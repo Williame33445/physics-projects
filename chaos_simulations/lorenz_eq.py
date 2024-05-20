@@ -25,6 +25,7 @@ def f(t,R):
     f_z = x*y - b*z
     return np.array([f_x,f_y,f_z])
 
+
 #actual simulation
 h = 0.001
 t = 0
@@ -43,3 +44,13 @@ ax.plot3D(xline, yline, zline, 'blue',linewidth = '.5')
 plt.show()
 
 
+"""stuff to do:
+-look at the sensitivity on intial conditions (deviation of close solutions), try and find exponential
+divergence
+-try and calculate the dimention
+-vary r and look at the r=24.78
+-also look at case beforehand (phase protraits may be nice here)
+-write up clearly what you find and comment code making it clear what you have done (may be useful to
+store data in jsons so you don't have to keep running it)
+ 
+ """

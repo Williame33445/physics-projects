@@ -1,5 +1,5 @@
 #implements rk4 methods
-#works for both vectors and scalars
+#works for arrays 
 
 def iterateRK4(t_n,y_n,h,f):
     k_1 = f(t_n, y_n)
