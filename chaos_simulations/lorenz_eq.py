@@ -26,16 +26,49 @@ def f(t,R):
 
 #simulation parameter
 h = 0.001
+N = 10**6
 
 #simulate function
 def simulate(RStates):
     t = 0
-    for x in range(10**5):
+    for x in range(N):
         RStates.append(iterateRK4(t,RStates[-1],h,f))
     return RStates
 
 def transformToXYZ(lst):
     return [[s[c] for s in lst] for c in range(3)]
+
+
+#Deviation of intially close trajectories, try and get liapunov coefficent (need more data)
+
+#delta = 10**(-10) 
+#state1 = simulate([np.array([0.1,0,0])])
+#state2 = simulate([np.array([0.1+delta,0,0])])
+#deviationList = [np.linalg.norm(state1[i]-state2[i]) for i in range(len(state1))]
+#timeArray =  np.linspace(0,1,num=N+1) ,need to scale to get actual predictions
+
+#plt.plot(timeArray,deviationList)
+#plt.show()
+
+
+
+
+#predictive chaos structure (done, need to add some axes and clean up)
+
+#niave way to find local maxima
+def maxima(i,lst):
+    if i == 0 or i == 1 or i == len(lst) - 1 or i == len(lst):
+        return False
+    return (lst[i-1]<lst[i]) and (lst[i]>lst[i+1])
+
+#s1 = transformToXYZ(simulate([np.array([0.1,0,0])]))[2]
+#maximaList = [m for i,m in enumerate(s1) if maxima(i,s1)]
+
+#z_n = maximaList[:-1]
+#z_n1 = maximaList[1:]
+#plt.scatter(z_n,z_n1)
+#plt.show()
+
 
 
 # example simulation and graph
@@ -82,8 +115,7 @@ print(1/m)
 
 
 """stuff to do:
--look at the sensitivity on intial conditions (deviation of close solutions), try and find exponential
-divergence
+-try and get liapunov coefficent from sensativity calculation
 -try and calculate the dimention
 -vary r and look at the r=24.78
 -also look at case beforehand (phase protraits may be nice here)
