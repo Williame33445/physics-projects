@@ -32,15 +32,18 @@ def simulate(RStates):
     t = 0
     for x in range(10**5):
         RStates.append(iterateRK4(t,RStates[-1],h,f))
-    return [[s[c] for s in RStates] for c in range(3)]
+    return RStates
+
+def transformToXYZ(lst):
+    return [[s[c] for s in lst] for c in range(3)]
 
 
 # example simulation and graph
-states = simulate([np.array([0.1,0,0])])
+#states = simulate([np.array([0.1,0,0])])
 
-ax = plt.axes(projection='3d')
-ax.plot3D(states[0], states[1], states[2], 'blue',linewidth = '.5')
-plt.show()
+#ax = plt.axes(projection='3d')
+#ax.plot3D(states[0], states[1], states[2], 'blue',linewidth = '.5')
+#plt.show()
 
 # Use this to generate a large number of simulations (via GPUs?) then try and get dim via averages
 num = 2
@@ -49,6 +52,31 @@ for x in np.linspace(-.5,.5,num):
     for y in np.linspace(-.5,.5,num):
         for z in np.linspace(-.5,.5,num):
             evenList.append(np.array([x,y,z]))
+
+statesLst = []
+for l in evenList:
+    statesLst += simulate([l])
+
+print(statesLst)
+def findN(R,lst):
+    n = 0 #should write this more elgantly
+    for pos in lst:
+        if np.linalg.norm(pos)<R:
+            n += 1
+    return n
+
+R,N = np.linspace(0,20,40),np.linspace(0,20,40) #naming here is bad
+for i,r in enumerate(R):
+    N[i] = findN(r,statesLst)
+
+plt.plot(R ,np.log(N))
+plt.show()
+
+#use method of least squares to deduce dimention
+m,c = np.linalg.lstsq(np.vstack([R,np.ones(len(R))]).T,np.log(N),rcond=None)[0]
+print(m)
+print(1/m)
+#may need to remove ends, should use jupyter notebook or store the data somewhereo
 
 #As there is no preference to different points on the strange attractor I think that this is viable
 
