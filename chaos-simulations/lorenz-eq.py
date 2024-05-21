@@ -26,12 +26,12 @@ def f(t,R):
 
 #simulation parameter
 h = 0.001
-N = 10**6
+numberOfRuns = 10**6
 
 #simulate function
 def simulate(RStates):
     t = 0
-    for x in range(N):
+    for x in range(numberOfRuns):
         RStates.append(iterateRK4(t,RStates[-1],h,f))
     return RStates
 
