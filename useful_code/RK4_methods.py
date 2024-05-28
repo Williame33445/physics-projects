@@ -1,5 +1,6 @@
 
 
+#should update to adjust h automatically, see book, create new function
 def iterateRK4(t_n,y_n,h,f):
     """
     Iterates by RK4 method.
@@ -12,7 +13,7 @@ def iterateRK4(t_n,y_n,h,f):
     return y_n + h*(k_1 + 2*k_2 + 2*k_3 + k_4)/6
 
 
-def simulateDuffing(t_0,y_0,numberOfRuns,h,f):
+def simulate(t_0,y_0,numberOfRuns,h,f):
     """
     Uses RK4 method to find a set of points on the solution to dY/dt=f(t,Y) given an intial condition.
     """
