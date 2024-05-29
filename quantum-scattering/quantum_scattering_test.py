@@ -21,7 +21,7 @@ class TestNumerov(unittest.TestCase):
         h = 0.1
         N = 30
         u_0 = 0
-        u_1 = h**(l+1)
+        u_1 = h**(l+1) #this is a guess from solving a well behaved system at the origin
         
         #run simulation
         rList,uNumericalList = runNumerov(u_0,u_1,h,FQHO1stEx,N)
