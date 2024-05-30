@@ -1,6 +1,8 @@
 import sys
 import os
 from scipy import constants
+from scipy.signal import savgol_filter
+import matplotlib.pyplot as plt
 import numpy as np
 from spherically_symetric_quantum_scattering import ScatteringSystem
 
@@ -19,17 +21,27 @@ def uSmallr(r):
 
 
 #find intial conditions and h
-r_0 = 0.5*rho
-r_1 = 0.8*rho
+r_0 = 0.7*rho
+r_1 = 0.701*rho
 h = r_1 - r_0
 u_0 = uSmallr(r_0)
 u_1 = uSmallr(r_1)
 
 #system parameters
-E = 1
-r_end = 10000
+EArray = np.arange(.1,3.5,.01)
+r_end = 5
 
 #run simulation
-scatteringSys = ScatteringSystem(E,V_LJ,r_0,h,u_0,u_1,r_end,6,simpleUnits=False)
+lst = []
+for E in EArray:
+    lst.append(ScatteringSystem(E,V_LJ,r_0,h,u_0,u_1,r_end,8,simpleUnits=False).totalCrossSection)
+    print(E)
 
-print(scatteringSys.totalCrossSection)
+#filterlst = savgol_filter(lst, 3, 3) 
+
+plt.plot(EArray,lst)
+#plt.plot(EArray,filterlst)
+
+plt.show()
+
+#peak at .5 1.5 and 2.5

@@ -7,10 +7,10 @@ from scipy import special
 sys.path.append(os.path.abspath("."))
 from useful_code.numerov_method import *
 
-def findPhaseShift(r_max,u_max,r_end,u_end,l):
+def findPhaseShift(r_max,u_max,r_end,u_end,l,k):
     K = (r_max*u_end)/(r_end*u_max)
-    numerator = K*special.spherical_jn(l,r_max) - special.spherical_jn(l,r_end)
-    denominator = K*special.spherical_yn(l,r_max) - special.spherical_yn(l,r_end)
+    numerator = K*special.spherical_jn(l,k*r_max) - special.spherical_jn(l,k*r_end)
+    denominator = K*special.spherical_yn(l,k*r_max) - special.spherical_yn(l,k*r_end)
     return np.arctan(numerator/denominator)
 
 
@@ -62,10 +62,11 @@ class ScatteringSystem:
             u_max = self.uLists[l][self.r_maxIndex]
             u_end = self.uLists[l][-1]
             self.phaseShifts.append(findPhaseShift(self.r_max,u_max,
-                                           self.r_end,u_end,l))
+                                           self.r_end,u_end,l,self.k))
             
     def findTotalCrossSection(self):
         elementsOfSum = [(2*l + 1)*(np.sin(deltaL)**2) for l,deltaL in enumerate(self.phaseShifts)]
+        
         self.totalCrossSection = 4*np.pi*sum(elementsOfSum)/(self.k**2)
 
 
