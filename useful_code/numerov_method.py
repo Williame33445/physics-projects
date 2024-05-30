@@ -13,9 +13,9 @@ def iterateNumerov(x_t,x_tMinush,t,h,f):
     w_rPlush = 2*w_t - w_tMinush + x_t*f(t)*(h**2)
     return wInv(w_rPlush,t,h,f)
 
-def runNumerov(x_0,x_1,h,f,N):
+def runNumerov(t_0,h,x_0,x_1,f,N):
     xList = [x_0,x_1]
-    tList = [0,h]
+    tList = [t_0,t_0 + h]
     for i in range(N):
         x_i = xList[-1]
         x_iMinus1 = xList[-2]

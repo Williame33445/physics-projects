@@ -11,35 +11,38 @@ from hydrogen_scattering_by_krypton_atoms import *
 class TestNumerov(unittest.TestCase):
 
     def testQHO(self):
-        #simulation setup
+        #system parameters
         V = lambda r : r**2
         E = 3
         l = 0
-        FQHO1stEx = lambda r: F(l,r,E,1,V,units=True)
+        m = 1
 
         #simulation parameters
         h = 0.1
-        N = 30
+
+        #intial conditions
+        r_0 = 0
+        r_end = 4
         u_0 = 0
         u_1 = h**(l+1) #this is a guess from solving a well behaved system at the origin
+
         
-        #run simulation
-        rList,uNumericalList = runNumerov(u_0,u_1,h,FQHO1stEx,N)
+        
+        scatteringSys = ScatteringSystem(E,l,m,V,r_0,h,u_0,u_1,r_end,simpleUnits=True)
 
         #finds expected predictions
-        rArray = np.array(rList)
-        uExpected = np.exp((h**2)/2)*rArray*np.exp(-(rArray**2)/2)        
+        rArray = np.array(scatteringSys.rList)
+        uExpected = np.exp((h**2)/2)*rArray*np.exp(-(rArray**2)/2)
+        print(uExpected[-1])    
+        print(scatteringSys.uList[-1])   
 
-        for i,u in enumerate(uNumericalList):
+        for i,u in enumerate(scatteringSys.uList):
             #as h^4 is the order than this method is correct to at least 2 dp
             #allows for some fluctuations due to rounding
 
             difference = np.round(u - uExpected[i], decimals=2)
+            print(difference)
             
             self.assertEqual(0,difference)
-
-
-if __name__=="__main__":
-    unittest.main()
 
 
