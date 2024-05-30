@@ -2,11 +2,7 @@ import unittest
 import os
 import sys
 import numpy as np
-
-sys.path.append(os.path.abspath("."))
-
-from useful_code.numerov_method import *
-from hydrogen_scattering_by_krypton_atoms import * 
+from spherically_symetric_quantum_scattering import ScatteringSystem
 
 class TestNumerov(unittest.TestCase):
 
@@ -33,15 +29,13 @@ class TestNumerov(unittest.TestCase):
         #finds expected predictions
         rArray = np.array(scatteringSys.rList)
         uExpected = np.exp((h**2)/2)*rArray*np.exp(-(rArray**2)/2)
-        print(uExpected[-1])    
-        print(scatteringSys.uList[-1])   
+   
 
         for i,u in enumerate(scatteringSys.uList):
             #as h^4 is the order than this method is correct to at least 2 dp
             #allows for some fluctuations due to rounding
 
             difference = np.round(u - uExpected[i], decimals=2)
-            print(difference)
             
             self.assertEqual(0,difference)
 
