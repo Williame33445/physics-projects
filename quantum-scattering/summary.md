@@ -14,7 +14,7 @@ where $\vec{r}$ is the relative position of the molecules, $V_{LJ}(r)$ is the Le
 
 Due to spherical symmetry, $\psi(\vec{r})$ can be expanded in terms of spherical harmonics as:
 
-$$\psi(\vec{r}) = \frac{1}{r}\sum^{\infty}_{l = 0}\sum^{l}_{m=-l}A_{l,m}u_l(r)Y_{l,m}(\theta,\phi)\tag{2}  $$
+ $$\psi(\vec{r}) = \frac{1}{r}\sum\limits_{l = 0}^{\infty} \sum\limits_{m=-l}^{l}A_{l,m}u_l(r)Y_{l,m}(\theta,\phi)\tag{2} $$
 
 Plugging this in to $(1)$ gives the radial time independent Schrödinger equation for each $u_l(\vec{r})$:
 
