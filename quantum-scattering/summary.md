@@ -8,15 +8,15 @@ This project (adapted from [ref]) simulates molecule scattering experiments usin
 
 The scattering is described by the time independent Schrödinger equation. This is:
 
-$$-\frac{\hbar^2}{2m}\nabla^2\psi(\bm{r}) + V_{LJ}(r)\psi(\bm{r}) = E\psi(\bm{r})\tag{1}$$
+$$-\frac{\hbar^2}{2m}\nabla^2\psi(\vec{r}) + V_{LJ}(r)\psi(\vec{r}) = E\psi(\vec{r})\tag{1}$$
 
-where $\bm{r}$ is the relative position of the molecules, $V_{LJ}(r)$ is the Lennard-Jones potential, $m$ is the reduced mass of the molecules, $\psi(\bm{r})$ is the wavefunction, $E$ is the total energy of the molecules[^1] (can be any value choosen) and $\hbar$ is Plank's constant.
+where $\vec{r}$ is the relative position of the molecules, $V_{LJ}(r)$ is the Lennard-Jones potential, $m$ is the reduced mass of the molecules, $\psi(\vec{r})$ is the wavefunction, $E$ is the total energy of the molecules[^1] (can be any value choosen) and $\hbar$ is Plank's constant.
 
-Due to spherical symmetry, $\psi(\bm{r})$ can be expanded in terms of spherical harmonics as:
+Due to spherical symmetry, $\psi(\vec{r})$ can be expanded in terms of spherical harmonics as:
 
-$$\psi(\bm{r}) = \frac{1}{r}\sum^{\infty}_{l = 0} \sum^{l}_{m=-l}A_{l,m}u_l(r)Y_{l,m}(\theta,\phi)\tag{2} $$
+$$\psi(\vec{r}) = \frac{1}{r}\sum^{\infty}_{l = 0} \sum^{l}_{m=-l}A_{l,m}u_l(r)Y_{l,m}(\theta,\phi)\tag{2} $$
 
-Plugging this in to $(1)$ gives the radial time independent Schrödinger equation for each $u_l(\bm{r})$:
+Plugging this in to $(1)$ gives the radial time independent Schrödinger equation for each $u_l(\vec{r})$:
 
 $$\left[\frac{\hbar^2}{2m}\frac{d^2}{dr^2} + E - V(r) - \frac{\hbar^2l(l+1)}{2mr^2}\right]u_l(r) = 0\tag{3}$$
 
