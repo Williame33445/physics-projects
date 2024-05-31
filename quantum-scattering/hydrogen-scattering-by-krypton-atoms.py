@@ -1,6 +1,3 @@
-import sys
-import os
-from scipy import constants
 from scipy.signal import savgol_filter
 import matplotlib.pyplot as plt
 import numpy as np
@@ -32,16 +29,14 @@ EArray = np.arange(.1,3.5,.01)
 r_end = 5
 
 #run simulation
-lst = []
-for E in EArray:
-    lst.append(ScatteringSystem(E,V_LJ,r_0,h,u_0,u_1,r_end,8,simpleUnits=False).totalCrossSection)
-    print(E)
+totalCrossSectionList = []
+for i,E in enumerate(EArray):
+    totalCrossSectionList.append(ScatteringSystem(E,V_LJ,r_0,h,u_0,u_1,r_end,8).totalCrossSection)
+    print(str(np.round(100*i/len(EArray),decimals=2))+"%")
 
-#filterlst = savgol_filter(lst, 3, 3) 
-
-plt.plot(EArray,lst)
-#plt.plot(EArray,filterlst)
-
+#graph
+plt.plot(EArray,totalCrossSectionList)
+plt.xlabel("Energy [MeV]")
+plt.ylabel(r'Total Cross Section [$\rho^2$]')
+plt.title("Total Cross section vs energy for H-Kr scattering")
 plt.show()
-
-#peak at .5 1.5 and 2.5
