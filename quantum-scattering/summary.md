@@ -20,7 +20,7 @@ Plugging this in to $(1)$ gives the radial time independent Schrödinger equatio
 
 $$\left[\frac{\hbar^2}{2m}\frac{d^2}{dr^2} + E - V(r) - \frac{\hbar^2l(l+1)}{2mr^2}\right]u_l(r) = 0\tag{3}$$
 
-Equation $(3)$ cannot be easily solved analytically for cases where $V_{LJ}(r)\neq 0$. However, as $V_{LJ}(r)$ is only non-zero when $r$ is small, the system can be solved numerically in this region. Then, using the boundary conditions generated from the numerical part, solutions in the $V_{LJ}(r)= 0$ region can be deduced. This solution can then be used to find simulation parameters. This is the basic idea behind this project.
+Equation $(3)$ cannot be easily solved analytically for cases where $V_{LJ}(r)\neq 0$. However, as $V_{LJ}(r)$ is only approximately non-zero when $r$ is small, the system can be solved numerically in this region. Then, using the boundary conditions generated from the numerical part, solutions in the $V_{LJ}(r)= 0$ region can be deduced. This solution can then be used to find simulation parameters. This is the basic idea behind this project.
 
 ### Numerical simulation
 
@@ -55,7 +55,7 @@ $ s via equation (5) and then plugging into equations (6) and (7) to deduce simu
 
 ## Implementation
 
-This project was implemented as a class called ScatteringSystem in spherically_symetric_quantum_scattering.py. This class takes in the initial conditions near the origin  (r_0,h,u_0,u_1)[^4], the energy of the system (E), the radius of the $V(r)\neq 0$ region (r_max) and the max value of $l$ to calculate to (lCutoff[^5]). The class then runs the numerical simulation, deduces the $\delta_l$ s and finds the total cross section (stored as class.totalCrossSection). The differential cross section can then be found using the method differentialCrossSection().
+This project was implemented as a class called ScatteringSystem in spherically_symetric_quantum_scattering.py. This class takes in the initial conditions near the origin  (r_0,h,u_0,u_1)[^4], the energy of the system (E), the radius of the $V(r)\neq 0$ region (r_b1) and the max value of $l$ to calculate to (lCutoff[^5]). The class then runs the numerical simulation, deduces the $\delta_l$ s and finds the total cross section (stored as class.totalCrossSection). The differential cross section can then be found using the method differentialCrossSection().
 
 ## Example
 

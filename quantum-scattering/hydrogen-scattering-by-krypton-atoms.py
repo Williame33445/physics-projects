@@ -3,11 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from spherically_symetric_quantum_scattering import ScatteringSystem
 
-# some constants: energy is measure in meV and distance in units of rho
-# means 2m/hbar^2 = 6.12 meV^-1 rho^-2
+#constnats, energy is measured in meV and distance in units of rho
 epsilon = 5.9
 rho = 1
-C = np.sqrt(epsilon*6.12/25) #this is needed to get intial conditions for simulation
+C = np.sqrt(epsilon*6.12/25) #needed for intial conditions
 
 def V_LJ(r):
     """
@@ -15,8 +14,7 @@ def V_LJ(r):
     """
     return epsilon*((rho/r)**12 - 2*((rho/r)**6))
 
-#this function is needed as 2 intial boundary conditions are required for the V != 0
-#part of the simulation 
+#this function is needed as 2 intial boundary conditions are required for the numerical simulation 
 def uSmallr(r):
     """
     Approximate solution to u for small r
@@ -24,7 +22,7 @@ def uSmallr(r):
     return np.exp(-C/(r**5))
 
 
-#find intial conditions and h (don't use r_0 = 0 due to 0 error)
+#find intial conditions and h 
 r_0 = 0.7*rho
 r_1 = 0.701*rho
 h = r_1 - r_0

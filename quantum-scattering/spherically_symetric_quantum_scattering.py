@@ -20,30 +20,28 @@ class ScatteringSystem:
     h - distance between r_0 and the r value corresponding to u_1
     u_0 - first inital condition u value
     u_1 - second intial condition u value
-    r_max - radius for the V != 0 region
+    r_max - boundary radius for the V != 0 region
     lCutoff - value of l that the sums are performed to (usually 9)
     """
     def __init__(self,E,V,r_0,h,u_0,u_1,r_max,lCutoff):
         #system parameters
         self.E = E
         self.k = np.sqrt(units*E)
-        self.lambbda = 2*np.pi/self.k
+        self.wavelength = 2*np.pi/self.k
         self.V = V
-
-        #cutoff for sums in l
         self.lCutOff = lCutoff
-
-        #simulation parameters
         self.h = h
-        #finds max number of points required to desribe r_max + wavelength of energy region
-        #find this region as 2 boundary conditions are required to find delta_l's
-        self.N = int(np.ceil((r_max + self.lambbda - r_0)/h)) 
-
-        #intial and final r values
         self.r_0 = r_0
-        self.r_maxIndex = int(np.ceil((r_max-r_0)/h))
-        self.r_max = h*self.r_maxIndex + r_0 #1st point of V!=0 boundary, used for boundary conditions
-        self.r_end = r_0 + self.N*h #2nd point used for boundary conditions, out of V!=0 boundary by def
+
+        #finds max number of points seperated by h required to desribe (r < b1 + wavelength) region
+        self.N = int(np.ceil((r_max + self.wavelength - r_0)/h)) 
+
+        #finds b1 index and the r corresponding to that index, used as boundary conditions for finding phases 
+        self.r_b1Index = int(np.ceil((r_max-r_0)/h))
+        self.r_b1 = h*self.r_b1Index + r_0 
+
+        #finds final r value calculated, used as boundary condition for finding phases
+        self.r_b2 = r_0 + self.N*h
 
         #runs simulations for l values
         self.uLists = []
@@ -60,18 +58,15 @@ class ScatteringSystem:
         """
         The F_l(r) part of the numerov method, see (Thijssen, 2013, p. 573) for explaination.
         """
-        #removes certain divergences that don't actually occur
-        if r == 0 and self.r_0 == 0:
-            return 0
         return units*self.V(r) + l*(l+1)/(r**2) - units*self.E
     
     def findlPhaseShift(self,l,u_max,u_end):
         """
-        Given boundary conditions finds l phase shift from eq (5)
+        Given boundary conditions finds l phase shift from eq (5).
         """
-        K = (self.r_max*u_end)/(self.r_end*u_max)
-        numerator = K*special.spherical_jn(l,self.k*self.r_max) - special.spherical_jn(l,self.k*self.r_end)
-        denominator = K*special.spherical_yn(l,self.k*self.r_max) - special.spherical_yn(l,self.k*self.r_end)
+        K = (self.r_b1*u_end)/(self.r_b2*u_max)
+        numerator = K*special.spherical_jn(l,self.k*self.r_b1) - special.spherical_jn(l,self.k*self.r_b2)
+        denominator = K*special.spherical_yn(l,self.k*self.r_b1) - special.spherical_yn(l,self.k*self.r_b2)
         return np.arctan(numerator/denominator)
 
 
@@ -81,8 +76,8 @@ class ScatteringSystem:
         """
         self.phaseShifts = []
         for l in range(self.lCutOff):
-            u_max = self.uLists[l][self.r_maxIndex]
-            u_end = self.uLists[l][-1] #as u_end is the size of the list
+            u_max = self.uLists[l][self.r_b1Index]
+            u_end = self.uLists[l][-1] #as u_end at the size of the list
             self.phaseShifts.append(self.findlPhaseShift(l,u_max,u_end))
             
     def findTotalCrossSection(self):
@@ -100,21 +95,3 @@ class ScatteringSystem:
                                 special.eval_legendre(l,np.cos(theta)))**2
         elementsOfSum = [termOfSum(deltaL,l) for l,deltaL in enumerate(self.phaseShifts)]
         return sum(elementsOfSum)/(self.k**2)
-
-
-
-
-
-
-
-
-
-
-
-
-        
-
-        
-        
-
-
