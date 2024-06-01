@@ -7,17 +7,24 @@ from spherically_symetric_quantum_scattering import ScatteringSystem
 # means 2m/hbar^2 = 6.12 meV^-1 rho^-2
 epsilon = 5.9
 rho = 1
-alpha = 6.12
-C = np.sqrt(epsilon*alpha/25)
+C = np.sqrt(epsilon*6.12/25) #this is needed to get intial conditions for simulation
 
 def V_LJ(r):
+    """
+    Lennard-Jones potential.
+    """
     return epsilon*((rho/r)**12 - 2*((rho/r)**6))
 
+#this function is needed as 2 intial boundary conditions are required for the V != 0
+#part of the simulation 
 def uSmallr(r):
+    """
+    Approximate solution to u for small r
+    """
     return np.exp(-C/(r**5))
 
 
-#find intial conditions and h
+#find intial conditions and h (don't use r_0 = 0 due to 0 error)
 r_0 = 0.7*rho
 r_1 = 0.701*rho
 h = r_1 - r_0
