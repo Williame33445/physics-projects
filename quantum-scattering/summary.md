@@ -74,12 +74,12 @@ Fischer, J.; Wendland, M., 2023, On the history of key empirical intermolecular 
 
 
 
-[^1]: It is conventional to consider the frame where the heavier molecule is stationary at the origin and the lighter particle is moving; in this case, $E$ is the lighter particles kinetic energy at infinity. This convention is adopted in this project.
+[^1]: It is conventional to consider the frame where the heavier molecule is stationary at the origin and the lighter particle is moving; in this case, E is the lighter particles kinetic energy at infinity. This convention is adopted in this project.
 
 [^2]: For a theoretical justification see (Thijssen, 2013, p. 18)
 
 [^3]: There are two common types of scattering parameter: differential cross section and total cross section. Differential cross section is a function of $\theta$ and $\phi$. It is proportional to the probability of a particle scattering in that direction. Total cross section is a number. It is proportional to the probability of a particle being scattered.
 
-[4^]: Instead of r_0 and r_1, r_0 and h = r_1 - r_0 is given.
+[^4]: Instead of r_0 and r_1, r_0 and h = r_1 - r_0 is given.
 
-[5^]: In this situation only $l<9$ is needed.
+[^5]: In this situation only l<9 is needed.
