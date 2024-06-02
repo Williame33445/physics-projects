@@ -46,6 +46,6 @@ for i,E in enumerate(EArray):
 #graph
 plt.plot(EArray,totalCrossSectionList)
 plt.xlabel("Energy [MeV]")
-plt.ylabel(r'Total Cross Section [$\rho^2$]')
-plt.title("Total Cross section vs energy for H-Kr scattering")
+plt.ylabel(r'Total Cross-Section [$\rho^2$]')
+plt.title("Total Cross-Section vs Energy for H-Kr scattering")
 plt.show()

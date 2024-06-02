@@ -1,6 +1,6 @@
 # Quantum Scattering Project
 
-This project, adapted from (Thijssen, 2013, p. 14), simulates molecule scattering experiments using the Lennard-Jones potential (Fischer, 2023, p. 2) to model interactions. These simulations are used to produce the differential cross section and total cross section.
+This project, adapted from (Thijssen, 2013, p. 14), simulates molecule scattering experiments using the Lennard-Jones potential (Fischer, 2023, p. 2) to model interactions. These simulations are used to produce the differential cross-section and total cross-section.
 
 ## Theory
 
@@ -46,7 +46,7 @@ $$\frac{d\sigma}{d\omega} = \frac{1}{k^2}\bigg|\sum^{\infty}_{l = 0}(2l+1)e^{i\d
 
 $$\sigma_{total}= \frac{4\pi}{k^2}\sum^{\infty}_{l = 0}(2l+1)sin^2(\delta_l)\tag{7}$$
 
-where $P_l(x)$ is the $l^{th}$ Legendre polynomial, $\frac{d\sigma}{d\omega}$ is the differential cross section and $\sigma_{total}$ is the total cross section. As with the simulations, the terms of the sums become negligible for $l>9$, meaning these terms do not need to be evaluated.
+where $P_l(x)$ is the $l^{th}$ Legendre polynomial, $\frac{d\sigma}{d\omega}$ is the differential cross-section and $\sigma_{total}$ is the total cross-section. As with the simulations, the terms of the sums become negligible for $l>9$, meaning these terms do not need to be evaluated.
 
 ### Summary of method
 
@@ -55,11 +55,11 @@ $ s via equation (5) and then plugging into equations (6) and (7) to deduce simu
 
 ## Implementation
 
-This project was implemented as a class called ScatteringSystem in spherically_symetric_quantum_scattering.py. This class takes in the initial conditions near the origin  (r_0,h,u_0,u_1)[^4], the energy of the system (E), the radius of the $V(r)\neq 0$ region (r_b1) and the max value of $l$ to calculate to (lCutoff[^5]). The class then runs the numerical simulation, deduces the $\delta_l$ s and finds the total cross section (stored as class.totalCrossSection). The differential cross section can then be found using the method differentialCrossSection().
+This project was implemented as a class called ScatteringSystem in spherically_symetric_quantum_scattering.py. This class takes in the initial conditions near the origin  (r_0,h,u_0,u_1)[^4], the energy of the system (E), the radius of the $V(r)\neq 0$ region (r_b1) and the max value of $l$ to calculate to (lCutoff[^5]). The class then runs the numerical simulation, deduces the $\delta_l$ s and finds the total cross-section (stored as class.totalCrossSection). The differential cross-section can then be found using the method differentialCrossSection().
 
 ## Example
 
-In hydrogen-scattering-by-krypton-atoms.py the project is used to deduce the total cross section at different energies for scattering of hydrogen with krypton atoms. The distribution found is:
+In hydrogen-scattering-by-krypton-atoms.py the project is used to deduce the total cross-section at different energies for scattering of hydrogen with krypton atoms. The distribution found is:
 
 ![alt text](https://raw.githubusercontent.com/Williame33445/physics-projects/main/quantum-scattering/total-cross-section-vs-energy-for-H-Kr-scattering.png)
 
@@ -78,7 +78,7 @@ Fischer, J.; Wendland, M., 2023, On the history of key empirical intermolecular 
 
 [^2]: For a theoretical justification see (Thijssen, 2013, p. 18)
 
-[^3]: There are two common types of scattering parameter: differential cross section and total cross section. Differential cross section is a function of theta and phi. It is proportional to the probability of a particle scattering in that direction. Total cross section is a number. It is proportional to the probability of a particle being scattered.
+[^3]: There are two common types of scattering parameter: differential cross-section and total cross-section. Differential cross-section is a function of theta and phi. It is proportional to the probability of a particle scattering in that direction. Total cross-section is a number. It is proportional to the probability of a particle being scattered.
 
 [^4]: Instead of r_0 and r_1, r_0 and h = r_1 - r_0 is given.
 
