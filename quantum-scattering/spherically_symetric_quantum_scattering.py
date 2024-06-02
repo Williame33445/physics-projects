@@ -16,10 +16,10 @@ class ScatteringSystem:
 
     Inputs:
     E - energy of the system
-    V - spherically symetric potential of the system
+    V - spherically symmetric potential of the system
     r_0 - first initial condition r value
     h - distance between r_0 and the r value corresponding to u_1
-    u_0 - first inital condition u value
+    u_0 - first initial condition u value
     u_1 - second initial condition u value
     r_max - boundary radius for the V != 0 region
     lCutoff - value of l that the sums are performed to (usually 9)
@@ -34,7 +34,7 @@ class ScatteringSystem:
         self.h = h
         self.r_0 = r_0
 
-        #finds max number of points seperated by h required to describe (r < b1 + wavelength) region
+        #finds max number of points separated by h required to describe (r < b1 + wavelength) region
         self.N = int(np.ceil((r_max + self.wavelength - r_0)/h)) 
 
         #finds b1 index and the r corresponding to that index, used as boundary conditions for finding phases 
