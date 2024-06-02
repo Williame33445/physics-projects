@@ -3,10 +3,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from spherically_symetric_quantum_scattering import ScatteringSystem
 
-#constnats, energy is measured in meV and distance in units of rho
+#This program uses the ScatteringSystem class to calculate the distribution of total cross section 
+# vs energy for the K-H scattering.
+
+
+#constants, energy is measured in meV and distance in units of rho
 epsilon = 5.9
 rho = 1
-C = np.sqrt(epsilon*6.12/25) #needed for intial conditions
+C = np.sqrt(epsilon*6.12/25) #needed for initial conditions
 
 def V_LJ(r):
     """

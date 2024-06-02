@@ -11,15 +11,16 @@ units = 6.12
 
 class ScatteringSystem:
     """
-    Class that describes a certain scattering system.
+    Describes an instance of scattering of two molecules that interact under the Lennard-Jones potential.
+    Uses partial wave analysis and the Numerov method. 
 
     Inputs:
     E - energy of the system
     V - spherically symetric potential of the system
-    r_0 - first intial condition r value
+    r_0 - first initial condition r value
     h - distance between r_0 and the r value corresponding to u_1
     u_0 - first inital condition u value
-    u_1 - second intial condition u value
+    u_1 - second initial condition u value
     r_max - boundary radius for the V != 0 region
     lCutoff - value of l that the sums are performed to (usually 9)
     """
@@ -33,7 +34,7 @@ class ScatteringSystem:
         self.h = h
         self.r_0 = r_0
 
-        #finds max number of points seperated by h required to desribe (r < b1 + wavelength) region
+        #finds max number of points seperated by h required to describe (r < b1 + wavelength) region
         self.N = int(np.ceil((r_max + self.wavelength - r_0)/h)) 
 
         #finds b1 index and the r corresponding to that index, used as boundary conditions for finding phases 
@@ -51,12 +52,12 @@ class ScatteringSystem:
             self.uLists.append(ulList)
 
         #finds phase shifts and cross sections
-        self.findPhaseShifts()
-        self.findTotalCrossSection()
+        self.phaseShifts = self.findPhaseShifts()
+        self.totalCrossSection = self.findTotalCrossSection()
 
     def FL(self,r,l):
         """
-        The F_l(r) part of the numerov method, see (Thijssen, 2013, p. 573) for explaination.
+        The F_l(r) part of the Numerov method.
         """
         return units*self.V(r) + l*(l+1)/(r**2) - units*self.E
     
@@ -74,18 +75,19 @@ class ScatteringSystem:
         """
         Finds all phase shifts from uLists.
         """
-        self.phaseShifts = []
+        phaseShifts = []
         for l in range(self.lCutOff):
             u_max = self.uLists[l][self.r_b1Index]
             u_end = self.uLists[l][-1] #as u_end at the size of the list
-            self.phaseShifts.append(self.findlPhaseShift(l,u_max,u_end))
+            phaseShifts.append(self.findlPhaseShift(l,u_max,u_end))
+        return phaseShifts
             
     def findTotalCrossSection(self):
         """
         Uses eq (7) to find total cross section.
         """
         elementsOfSum = [(2*l + 1)*(np.sin(deltaL)**2) for l,deltaL in enumerate(self.phaseShifts)]
-        self.totalCrossSection = 4*np.pi*sum(elementsOfSum)/(self.k**2)
+        return 4*np.pi*sum(elementsOfSum)/(self.k**2)
 
     def differentialCrossSection(self,theta):
         """
