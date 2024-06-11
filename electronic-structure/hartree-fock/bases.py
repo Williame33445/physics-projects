@@ -2,12 +2,12 @@ from abc import abstractmethod, ABC
 import numpy as np 
 from scipy import special as sp
 
-class RHF(ABC):
-    def __init__(self,Z):
-        self.Z = Z
 
-    def findMatricies(self):
-        pass
+class Basis(ABC):
+    def __init__(self,Z,alphas,nuclearPositions):
+        self.Z = Z
+        self.alphas = alphas
+        self.nuclearPositions = nuclearPositions 
 
     @abstractmethod
     def overLapInt(self,p,q): #p and q are ints and specify the basis abstractly
@@ -27,12 +27,9 @@ class RHF(ABC):
 
 
 
-class RHF1sGTOBasis(RHF):
+class Basis1sGTO(Basis):
     def __init__(self,Z,alphas,nuclearPositions):
-        #all abstract class parts are defined first
-        RHF.__init__(self,Z)
-        self.alphas = alphas
-        self.nuclearPositions = nuclearPositions 
+        Basis.__init__(self,Z,alphas,nuclearPositions)
 
 
     def overLapInt(self,a,b):
