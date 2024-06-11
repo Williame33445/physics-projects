@@ -5,14 +5,22 @@ import numpy as np
 class HF(ABC):
     def __init__(self,Zs,N,basis):
         self.Zs = Zs
-        self.N = N
+        self.N = N #number of electrons
         self.basis = basis
 
-    def findEigenstates(self,F): #only works for ground state at the moment
-        eigenvalues, eigenvectors = np.linalg.eig(np.matmul(np.linalg.inv(self.basis.S),F))
-        (epison,index) = min([(eigenvalue, i) for i, eigenvalue in enumerate(eigenvalues)])
-        return epison,self.normalise(eigenvectors[index])
+    def iterateHF(self,F):
+        #find ground states
+        eigenvalues,eigenstates =  np.linalg.eig(np.matmul(np.linalg.inv(self.basis.S),F))
+        unsortedStates = [{"epsilon": eigenvalue, "state": self.normalise(eigenstates[i])} 
+                     for i, eigenvalue in enumerate(eigenvalues)]
+        sortedStates = sorted(unsortedStates,key=lambda v: v["epsilon"])
+        groundStates = sortedStates[-self.N:]
 
+        #should this just be returned or should ground state energy be found
+
+
+
+        
     def normalise(self,C):
         innerProduct = 0
         for i,c_i in enumerate(C):
