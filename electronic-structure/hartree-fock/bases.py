@@ -4,10 +4,45 @@ from scipy import special as sp
 
 
 class Basis(ABC):
-    def __init__(self,Z,alphas,nuclearPositions):
-        self.Z = Z
+    def __init__(self,Zs,alphas,nuclearPositions):
+        self.Zs = Zs
         self.alphas = alphas
-        self.nuclearPositions = nuclearPositions 
+        self.nuclearPositions = nuclearPositions #is this the nicest way to do this?
+        self.basisNumber = len(alphas)
+
+        #find base matricies and 2 electron integrals
+        self.S = self.findS()
+        self.h = self.findh()
+        self.twoElecInts = self.findTwoElecInts()
+
+    def findS(self):
+        S = np.empty([self.basisNumber,self.basisNumber])
+        for i in range(self.basisNumber):
+            for j in range(i):
+                integralij = self.overLapInt(i,j)
+                S[i,j] = integralij
+                S[j,i] = integralij
+        return S
+    
+    def findh(self):
+        h = np.empty([self.basisNumber,self.basisNumber])
+        for i in range(self.basisNumber):
+            for j in range(i):
+                kineticIntegral = 0.5*self.kineticInt(i,j) 
+                nuclearIntegral = sum([self.nucInt(i,j,R,self.Zs[n]) for n,R in enumerate(self.nuclearPositions)])
+                integral = kineticIntegral + nuclearIntegral
+                h[i,j] = integral
+                h[j,i] = integral
+        return h
+    
+    def findTwoElecInts(self):
+        twoElecInts = np.empty([self.basisNumber,self.basisNumber,self.basisNumber,self.basisNumber])
+        for i in range(self.basisNumber):
+            for k in range(i):
+                for j in range(self.basisNumber):
+                    for l in range(j):
+                        twoElecInts[i,j,k,l] = self.twoElecInt(i,j,k,l) #this can be done with 1/2 the efficiency
+        return twoElecInts
 
     @abstractmethod
     def overLapInt(self,p,q): #p and q are ints and specify the basis abstractly
@@ -18,7 +53,7 @@ class Basis(ABC):
         pass
 
     @abstractmethod
-    def nucInt(self,p,q,R_c):
+    def nucInt(self,p,q,R_c,Z):
         pass
 
     @abstractmethod
@@ -28,8 +63,8 @@ class Basis(ABC):
 
 
 class Basis1sGTO(Basis):
-    def __init__(self,Z,alphas,nuclearPositions):
-        Basis.__init__(self,Z,alphas,nuclearPositions)
+    def __init__(self,Zs,alphas,nuclearPositions):
+        Basis.__init__(self,Zs,alphas,nuclearPositions)
 
 
     def overLapInt(self,a,b):
@@ -56,14 +91,14 @@ class Basis1sGTO(Basis):
 
         return term1*term2*term3*term4
     
-    def nucInt(self,a,b,R_C):
+    def nucInt(self,a,b,R_C,Z):
         alpha_a = self.alphas[a]
         alpha_b = self.alphas[b]
         R_a = self.nuclearPositions[a]
         R_b = self.nuclearPositions[b]
         R_P = (alpha_a*R_a + alpha_b*R_b)/(alpha_a + alpha_b)
 
-        term1 = -2*np.pi*self.Z/(alpha_a + alpha_b)
+        term1 = -2*np.pi*Z/(alpha_a + alpha_b)
         term2 = np.exp(-(alpha_a*alpha_b)*(np.linalg.norm(R_a - R_b)**2)/(alpha_a + alpha_b))
 
         t = ((alpha_a + alpha_b)*(np.linalg.norm(R_P - R_C)**2))**0.5
