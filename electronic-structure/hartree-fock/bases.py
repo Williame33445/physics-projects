@@ -21,7 +21,7 @@ class Basis(ABC):
     def findS(self):
         S = np.empty([self.basisNumber,self.basisNumber])
         for i in range(self.basisNumber):
-            for j in range(i):
+            for j in range(i+1):
                 integralij = self.overLapInt(i,j)
                 S[i,j] = integralij
                 S[j,i] = integralij
@@ -30,7 +30,7 @@ class Basis(ABC):
     def findh(self):
         h = np.empty([self.basisNumber,self.basisNumber])
         for i in range(self.basisNumber):
-            for j in range(i):
+            for j in range(i+1):
                 kineticIntegral = 0.5*self.kineticInt(i,j) 
                 nuclearIntegral = sum([self.nucInt(i,j,R,self.Zs[n]) for n,R in enumerate(self.nuclearPositions)])
                 integral = kineticIntegral + nuclearIntegral
@@ -41,9 +41,9 @@ class Basis(ABC):
     def findTwoElecInts(self):
         twoElecInts = np.empty([self.basisNumber,self.basisNumber,self.basisNumber,self.basisNumber])
         for i in range(self.basisNumber):
-            for k in range(i):
+            for k in range(self.basisNumber):
                 for j in range(self.basisNumber):
-                    for l in range(j):
+                    for l in range(self.basisNumber):
                         twoElecInts[i,j,k,l] = self.twoElecInt(i,j,k,l) #this can be done with 1/2 the efficiency
         return twoElecInts
 
@@ -131,14 +131,10 @@ class Basis1sGTO(Basis):
         
         
         t = np.linalg.norm(R_P - R_Q)*((alpha_a + alpha_c)*(alpha_b + alpha_d)/(alpha_a + alpha_b + alpha_c + alpha_d))**0.5
-        #print(t)
         
         if t == 0:
             term3 = 1
         else:
             term3 = np.sqrt(np.pi)*sp.erf(t)/(2*t)
 
-
-        # if term1*term2*term3 > 100:
-        #     return 0
         return term1*term2*term3

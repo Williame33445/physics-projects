@@ -1,4 +1,5 @@
 import numpy as np
+#why do C's have to be real?
 
 class Eigenstates:
     def __init__(self,ups,downs):
@@ -33,31 +34,25 @@ class HF:
         self.iterateHF()
 
     def solveEigenEquation(self,spinDirection):
-        #print(self.F(spinDirection))
-
-        #print(np.linalg.inv(self.F(spinDirection))) # problem is in F
-        #print(np.matmul(np.linalg.inv(self.basis.S),self.F(spinDirection)))
         return np.linalg.eig(np.matmul(np.linalg.inv(self.basis.S),self.F(spinDirection)))
     
     def findE(self,epsilons):
         E = sum(epsilons)
         for C in self.eigenstates.ups:
             for i,c_i in enumerate(C):
-                for j,c_j in enumerate(C):
-                    E += self.basis.h[i,j]*np.conj(c_i)*c_j
+                for j,c_j in enumerate(C): 
+                    E += self.basis.h[i,j]*c_i*c_j
         
         for C in self.eigenstates.downs:
             for i,c_i in enumerate(C):
                 for j,c_j in enumerate(C):
-                    E += self.basis.h[i,j]*np.conj(c_i)*c_j
+                    E += self.basis.h[i,j]*c_i*c_j
         
-        return E
+        return E/2
 
 
         
     def iterateHF(self):
-        #print("iter")
-        #print(self.E)
         eigenvaluesUp,eigenstatesUp = self.solveEigenEquation("up")
         eigenvaluesDown,eigenstatesDown = self.solveEigenEquation("down")
 
@@ -74,21 +69,11 @@ class HF:
         sortedStates = sorted(combinedStates,key=lambda v: v["epsilon"])
         groundStates = sortedStates[:self.N]
 
-        #print(eigenvaluesUp)
-        #print(eigenvaluesDown)
-
-        #print(sortedStates)
-        print(sortedStates[:self.N])
-
         self.eigenstates.ups = [s["state"] for s in groundStates if s["spin"] == "up"]
         self.eigenstates.downs = [s["state"] for s in groundStates if s["spin"] == "down"]
         
 
         E = self.findE([s["epsilon"] for s in groundStates])
-        #print(self.E)
-        #print(abs(E - self.E))
-        #print(self.E)
-        #print(self.eigenstates.ups)
 
         if abs(E - self.E) < self.maxError:
             print(E)
@@ -111,9 +96,10 @@ class HF:
         innerProduct = 0
         for i,c_i in enumerate(C):
             for j,c_j in enumerate(C):
-                innerProduct += np.conj(c_i)*c_j*self.basis.S[i][j]
-
-        return C/(innerProduct**0.5) 
+                innerProduct += c_i*c_j*self.basis.S[i][j]
+        
+        
+        return C/(innerProduct**0.5)
 
         
 
@@ -126,14 +112,13 @@ class HF:
                 for CList in self.eigenstates.getCs(spinDirection):
                     for r in range(self.basis.basisNumber): #can be made more efficient
                         for s in range(self.basis.basisNumber):
-                            F[p,q] += np.conj(CList[r])*CList[s]*(self.basis.twoElecInts[p,r,q,s] - self.basis.twoElecInts[p,r,s,q])
-                            #print(self.basis.twoElecInts[p,r,q,s] - self.basis.twoElecInts[p,r,s,q])
-                            #print(f"{p},{q},{r},{s}")
+                            F[p,q] += CList[r]*CList[s]*(self.basis.twoElecInts[p,r,q,s] - self.basis.twoElecInts[p,r,s,q])
+
                 
                 for CList in self.eigenstates.getOppositeCs(spinDirection):
                     for r in range(self.basis.basisNumber):
                         for s in range(self.basis.basisNumber): 
-                            F[p,q] += np.conj(CList[r])*CList[s]*self.basis.twoElecInts[p,r,q,s]
+                            F[p,q] += CList[r]*CList[s]*self.basis.twoElecInts[p,r,q,s]
         
         return F
 
