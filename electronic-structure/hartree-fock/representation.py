@@ -2,14 +2,22 @@ from abc import abstractmethod, ABC
 import numpy as np 
 from scipy import special as sp
 
+def F_0(t):
+    if t == 0:
+        return 1
+    else:
+        return np.sqrt(np.pi)*sp.erf(t)/(2*t)
+
+
+
 
 #holds and describes the representations of the matricies
 
 class Representation(ABC):
-    def __init__(self,Zs,nuclearPositions,repNumber):
+    def __init__(self,Zs,nuclearPositions,repNumb):
         self.Zs = Zs
-        self.nuclearPositions = nuclearPositions #is this the nicest way to do this?
-        self.repNumber = repNumber
+        self.nuclearPositions = nuclearPositions 
+        self.repNumb = repNumb
 
         #find base matricies and 2 electron integrals
         self.S = self.findS()
@@ -19,8 +27,8 @@ class Representation(ABC):
         self.invS = np.linalg.inv(self.S)
 
     def findS(self):
-        S = np.empty([self.repNumber,self.repNumber])
-        for i in range(self.repNumber):
+        S = np.empty([self.repNumb,self.repNumb])
+        for i in range(self.repNumb):
             for j in range(i+1):
                 integralij = self.overLapInt(i,j)
                 S[i,j] = integralij
@@ -28,8 +36,8 @@ class Representation(ABC):
         return S
     
     def findh(self):
-        h = np.empty([self.repNumber,self.repNumber])
-        for i in range(self.repNumber):
+        h = np.empty([self.repNumb,self.repNumb])
+        for i in range(self.repNumb):
             for j in range(i+1):
                 kineticIntegral = 0.5*self.kineticInt(i,j) 
                 nuclearIntegral = sum([self.nucInt(i,j,R,self.Zs[n]) for n,R in enumerate(self.nuclearPositions)])
@@ -39,11 +47,11 @@ class Representation(ABC):
         return h
     
     def findTwoElecInts(self):
-        twoElecInts = np.empty([self.repNumber,self.repNumber,self.repNumber,self.repNumber])
-        for i in range(self.repNumber):
-            for k in range(self.repNumber):
-                for j in range(self.repNumber):
-                    for l in range(self.repNumber):
+        twoElecInts = np.empty([self.repNumb,self.repNumb,self.repNumb,self.repNumb])
+        for i in range(self.repNumb):
+            for k in range(self.repNumb):
+                for j in range(self.repNumb):
+                    for l in range(self.repNumb):
                         twoElecInts[i,j,k,l] = self.twoElecInt(i,j,k,l) #this can be done with 1/2 the efficiency
         return twoElecInts
     
@@ -63,6 +71,36 @@ class Representation(ABC):
         for i,D in enumerate(lst):
             lst[i]["state"] = self.normalise(D["state"])
         return lst
+    
+    def F(self,states1,states2):
+        F = np.empty([self.repNumb,self.repNumb])
+        for p in range(self.repNumb):
+            for q in range(self.repNumb):
+                F[p,q] = self.h[p,q]
+
+                for C in states1:
+                    for r,c_r in enumerate(C): #can be made more efficient
+                        for s,c_s in enumerate(C):
+                            F[p,q] += c_r*c_s*(self.twoElecInts[p,r,q,s] - self.twoElecInts[p,r,s,q])
+
+                
+                for C in states2:
+                    for r,c_r in enumerate(C):
+                        for s,c_s in enumerate(C): 
+                            F[p,q] += c_r*c_s*self.twoElecInts[p,r,q,s]
+        
+        return F
+    
+    
+    def findE(self,states):
+        E = 0
+        for S in states:
+            E += S["e"]
+            for i,c_i in enumerate(S["state"]):
+                for j,c_j in enumerate(S["state"]):
+                    E += self.h[i,j]*c_i*c_j
+        
+        return E/2
 
 
     @abstractmethod
@@ -128,10 +166,7 @@ class Rep1sGTO(Representation):
 
         t = ((alpha_a + alpha_b)*(np.linalg.norm(R_P - R_C)**2))**0.5
         
-        if t == 0:
-            term3 = 1
-        else:
-            term3 = np.sqrt(np.pi)*sp.erf(t)/(2*t)
+        term3 = F_0(t)
 
         return term1*term2*term3
 
@@ -154,9 +189,7 @@ class Rep1sGTO(Representation):
         
         t = np.linalg.norm(R_P - R_Q)*((alpha_a + alpha_c)*(alpha_b + alpha_d)/(alpha_a + alpha_b + alpha_c + alpha_d))**0.5
         
-        if t == 0:
-            term3 = 1
-        else:
-            term3 = np.sqrt(np.pi)*sp.erf(t)/(2*t)
+        term3 = F_0(t)
 
         return term1*term2*term3
+

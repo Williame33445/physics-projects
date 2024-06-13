@@ -25,7 +25,7 @@ EGuess = 0
 maxError = 0.1
 
 #print(np.linalg.inv(basis.S))
-iterateHF(rep.normaliseList(ups),rep.normaliseList(downs),rep,2,EGuess,maxError)
+print(iterateHF(rep.normaliseList(ups),rep.normaliseList(downs),rep,2,EGuess,maxError))
 
 
 #should look at hydrogen, put this case into a test, make more efficient and develop the class more
