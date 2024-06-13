@@ -53,6 +53,17 @@ class Representation(ABC):
             for j,c_j in enumerate(C):
                 innerProduct += c_i*c_j*self.S[i][j]
         return C/(innerProduct**0.5)
+    
+    def normaliseList(self,lst):
+        for i,C in enumerate(lst):
+            lst[i] = self.normalise(C)
+        return lst
+    
+    def normaliseDicList(self,lst):
+        for i,D in enumerate(lst):
+            lst[i]["state"] = self.normalise(D["state"])
+        return lst
+
 
     @abstractmethod
     def overLapInt(self,p,q): #p and q are ints and specify the basis abstractly
