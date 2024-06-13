@@ -1,11 +1,11 @@
 import numpy as np
 #why do C's have to be real?
 
-def combineParams(eigenVal,eigenVec,spin):
-    return {"e": eigenVal, "state": eigenVec, "spin": spin}
+def takeGroundEigStates(sortedStates,N):
+    return sortedStates[:N]
+     
 
-
-def iterateHF(ups,downs,rep,N,E,maxError):
+def iterateHF(ups,downs,rep,E,maxError,takeTargetEigStates): 
     FPlus = rep.F(ups,downs) #ups and downs need to be normalised before
     FMinus = rep.F(downs,ups)
 
@@ -18,7 +18,7 @@ def iterateHF(ups,downs,rep,N,E,maxError):
     combinedStates = combinedUp + combinedDown
 
     sortedStates = sorted(combinedStates,key=lambda v: v["e"])
-    ocuppiedStates = rep.normaliseDicList(sortedStates[:N]) #generalise
+    ocuppiedStates = rep.normaliseDicList(takeTargetEigStates(sortedStates)) 
     
     ENew = rep.findE(ocuppiedStates)
     
@@ -28,4 +28,4 @@ def iterateHF(ups,downs,rep,N,E,maxError):
     else:
         upsNew = [s["state"] for s in ocuppiedStates if s["spin"] == "up"]
         downsNew = [s["state"] for s in ocuppiedStates if s["spin"] == "down"]
-        return iterateHF(upsNew,downsNew,rep,N,ENew,maxError)
+        return iterateHF(upsNew,downsNew,rep,ENew,maxError,takeTargetEigStates)

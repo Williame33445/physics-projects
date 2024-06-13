@@ -10,7 +10,7 @@ def F_0(t):
 
 
 
-
+#can this be generalised for linear combinations two bases?
 #holds and describes the representations of the matricies
 
 class Representation(ABC):

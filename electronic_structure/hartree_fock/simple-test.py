@@ -1,6 +1,3 @@
-import sys
-import os
-
 from Hartree_Fock import *
 from representation import *
 
@@ -17,16 +14,23 @@ nucPos = [np.array([0,0,0])]
 rep = Rep1sGTO(Zs,alphas,nucPos,basisPos)
 
 
-#N,basis,eigenstatesGuess,EGuess,maxError 
 
 ups = [[1,1,1,1]]
 downs = [[1,1,1,1]]
 EGuess = 0
 maxError = 0.1
 
-#print(np.linalg.inv(basis.S))
-print(iterateHF(rep.normaliseList(ups),rep.normaliseList(downs),rep,2,EGuess,maxError))
+print(iterateHF(rep.normaliseList(ups),rep.normaliseList(downs),rep,EGuess,maxError,lambda s: takeGroundEigStates(s,2)))
 
 
-#should look at hydrogen, put this case into a test, make more efficient and develop the class more
-# excited states?
+
+"""
+Stuff to do:
+- excited states
+- hydrogen
+- other cases 
+- more general bases
+- linear combinations of bases structure?
+- make more efficient
+- comments
+"""
