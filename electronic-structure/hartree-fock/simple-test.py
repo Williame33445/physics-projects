@@ -2,7 +2,8 @@ import sys
 import os
 
 from Hartree_Fock import *
-from bases import *
+from representation import *
+from eigenstates import *
 
 #test case from variational principle part
 
@@ -15,12 +16,12 @@ basisPos = [np.array([0,0,0]),np.array([0,0,0]),np.array([0,0,0]),np.array([0,0,
 Zs = [2]
 nucPos = [np.array([0,0,0])]
 
-basis = Basis1sGTO(Zs,alphas,nucPos,basisPos)
+basis = Rep1sGTO(Zs,alphas,nucPos,basisPos)
 
 
 #N,basis,eigenstatesGuess,EGuess,maxError
 
-eigenstatesGuess = Eigenstates([[1,1,1,1]],[[1,1,1,1]])
+eigenstatesGuess = Eigenstates([[1,1,1,1]],[[1,1,1,1]],basis)
 EGuess = 0
 maxError = 0.01
 

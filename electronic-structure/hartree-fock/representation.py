@@ -3,24 +3,24 @@ import numpy as np
 from scipy import special as sp
 
 
-#this will not work for linear combinations! May be able to double define class?
+#holds and describes the representations of the matricies
 
-class Basis(ABC):
-    def __init__(self,Zs,alphas,nuclearPositions,basisPositions):
+class Representation(ABC):
+    def __init__(self,Zs,nuclearPositions,repNumber):
         self.Zs = Zs
-        self.alphas = alphas
-        self.basisPositions = basisPositions
         self.nuclearPositions = nuclearPositions #is this the nicest way to do this?
-        self.basisNumber = len(alphas)
+        self.repNumber = repNumber
 
         #find base matricies and 2 electron integrals
         self.S = self.findS()
         self.h = self.findh()
         self.twoElecInts = self.findTwoElecInts()
 
+        self.invS = np.linalg.inv(self.S)
+
     def findS(self):
-        S = np.empty([self.basisNumber,self.basisNumber])
-        for i in range(self.basisNumber):
+        S = np.empty([self.repNumber,self.repNumber])
+        for i in range(self.repNumber):
             for j in range(i+1):
                 integralij = self.overLapInt(i,j)
                 S[i,j] = integralij
@@ -28,8 +28,8 @@ class Basis(ABC):
         return S
     
     def findh(self):
-        h = np.empty([self.basisNumber,self.basisNumber])
-        for i in range(self.basisNumber):
+        h = np.empty([self.repNumber,self.repNumber])
+        for i in range(self.repNumber):
             for j in range(i+1):
                 kineticIntegral = 0.5*self.kineticInt(i,j) 
                 nuclearIntegral = sum([self.nucInt(i,j,R,self.Zs[n]) for n,R in enumerate(self.nuclearPositions)])
@@ -39,13 +39,20 @@ class Basis(ABC):
         return h
     
     def findTwoElecInts(self):
-        twoElecInts = np.empty([self.basisNumber,self.basisNumber,self.basisNumber,self.basisNumber])
-        for i in range(self.basisNumber):
-            for k in range(self.basisNumber):
-                for j in range(self.basisNumber):
-                    for l in range(self.basisNumber):
+        twoElecInts = np.empty([self.repNumber,self.repNumber,self.repNumber,self.repNumber])
+        for i in range(self.repNumber):
+            for k in range(self.repNumber):
+                for j in range(self.repNumber):
+                    for l in range(self.repNumber):
                         twoElecInts[i,j,k,l] = self.twoElecInt(i,j,k,l) #this can be done with 1/2 the efficiency
         return twoElecInts
+    
+    def normalise(self,C):
+        innerProduct = 0
+        for i,c_i in enumerate(C):
+            for j,c_j in enumerate(C):
+                innerProduct += c_i*c_j*self.S[i][j]
+        return C/(innerProduct**0.5)
 
     @abstractmethod
     def overLapInt(self,p,q): #p and q are ints and specify the basis abstractly
@@ -65,9 +72,13 @@ class Basis(ABC):
 
 
 
-class Basis1sGTO(Basis):
+class Rep1sGTO(Representation):
     def __init__(self,Zs,alphas,nuclearPositions,basisPositions):
-        Basis.__init__(self,Zs,alphas,nuclearPositions,basisPositions)
+        self.alphas = alphas
+        self.basisPositions = basisPositions
+        Representation.__init__(self,Zs,nuclearPositions,len(alphas))
+        
+        
 
 
     def overLapInt(self,a,b):
