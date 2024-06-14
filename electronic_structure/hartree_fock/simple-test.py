@@ -1,36 +1,36 @@
 from Hartree_Fock import *
 from representation import *
+from scipy.optimize import fmin
+import matplotlib.pyplot as plt
+#6-21G
+nullVec = np.array([0,0,0])
+alphaS = [642.4180000,96.51640000,22.01740000,6.176450000,1.935110000,0.6395770000,0.5402050000,0.1022550000,0.2856450000]
+typeS = [nullVec,nullVec,nullVec,nullVec,nullVec,nullVec,nullVec,nullVec,nullVec]
+baisS = [nullVec,nullVec,nullVec,nullVec,nullVec,nullVec,nullVec,nullVec,nullVec]
+alphaP = [0.5402050000,0.1022550000]
+basisP = [nullVec,nullVec]
+typePx = [np.array([1,0,0]),np.array([1,0,0])]
+typePy = [np.array([0,1,0]),np.array([0,1,0])]
+typePz = [np.array([0,0,1]),np.array([0,0,1])]
 
-#test case from variational principle part
 
+#basis is 15
 
-alphas = [0.298073,1.242567,5.782948,38.474970]
+alphas = alphaS + alphaP + alphaP + alphaP
 
-
-basisPos = [np.array([0,0,0]),np.array([0,0,0]),np.array([0,0,0]),np.array([0,0,0])]
-Zs = [2]
+basisPos = baisS + basisP + basisP + basisP
+Zs = [3]
 nucPos = [np.array([0,0,0])]
+type = typeS + typePx + typePy + typePz
 
-rep = Rep1sGTO(Zs,alphas,nucPos,basisPos)
+rep = Rep1s2p(Zs,alphas,nucPos,basisPos,type)
 
 
 
-ups = [[1,1,1,1]]
-downs = [[1,1,1,1]]
+ups = [[1,1,1,1,1,1,1,1,1,0,0,0,0,0,0]]
+downs = [[1,1,1,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,1]]
 EGuess = 0
-maxError = 0.1
+maxError = 0.01
 
-print(iterateHF(rep.normaliseList(ups),rep.normaliseList(downs),rep,EGuess,maxError,lambda s: takeGroundEigStates(s,2)))
+print(iterateHF(rep.normaliseList(ups),rep.normaliseList(downs),rep,EGuess,maxError,lambda s: takeGroundEigStates(s,3)))
 
-
-
-"""
-Stuff to do:
-- excited states
-- hydrogen
-- other cases 
-- more general bases
-- linear combinations of bases structure?
-- make more efficient
-- comments
-"""

@@ -1,12 +1,10 @@
 from abc import abstractmethod, ABC
 import numpy as np 
-from scipy import special as sp
+from GTO1s_matrix_elements import *
+from functools import partial
 
-def F_0(t):
-    if t == 0:
-        return 1
-    else:
-        return np.sqrt(np.pi)*sp.erf(t)/(2*t)
+
+
 
 
 
@@ -23,6 +21,8 @@ class Representation(ABC):
         self.S = self.findS()
         self.h = self.findh()
         self.twoElecInts = self.findTwoElecInts()
+
+        print(self.S)
 
         self.invS = np.linalg.inv(self.S)
 
@@ -60,6 +60,7 @@ class Representation(ABC):
         for i,c_i in enumerate(C):
             for j,c_j in enumerate(C):
                 innerProduct += c_i*c_j*self.S[i][j]
+
         return C/(innerProduct**0.5)
     
     def normaliseList(self,lst):
@@ -136,10 +137,7 @@ class Rep1sGTO(Representation):
         R_a = self.basisPositions[a]
         R_b = self.basisPositions[b]
 
-        term1 = (np.pi/(alpha_a + alpha_b))**1.5
-        term2 = np.exp(-(alpha_a*alpha_b)*(np.linalg.norm(R_a - R_b)**2)/(alpha_a + alpha_b))
-
-        return term1*term2
+        return overlap1s(R_a,alpha_a,R_b,alpha_b)
 
     def kineticInt(self,a,b):
         alpha_a = self.alphas[a]
@@ -147,28 +145,15 @@ class Rep1sGTO(Representation):
         R_a = self.basisPositions[a]
         R_b = self.basisPositions[b]
 
-        term1 = alpha_a*alpha_b/(alpha_a + alpha_b)
-        term2 = 6 - 4*alpha_a*alpha_b*(np.linalg.norm(R_a - R_b)**2)/(alpha_a + alpha_b)
-        term3 = (np.pi/(alpha_a + alpha_b))**1.5
-        term4 = np.exp(-(alpha_a*alpha_b)*(np.linalg.norm(R_a - R_b)**2)/(alpha_a + alpha_b))
-
-        return term1*term2*term3*term4
+        return kineticInt1s(R_a,R_b,alpha_a,alpha_b)
     
     def nucInt(self,a,b,R_C,Z):
         alpha_a = self.alphas[a]
         alpha_b = self.alphas[b]
         R_a = self.basisPositions[a]
         R_b = self.basisPositions[b]
-        R_P = (alpha_a*R_a + alpha_b*R_b)/(alpha_a + alpha_b)
 
-        term1 = -2*np.pi*Z/(alpha_a + alpha_b)
-        term2 = np.exp(-(alpha_a*alpha_b)*(np.linalg.norm(R_a - R_b)**2)/(alpha_a + alpha_b))
-
-        t = ((alpha_a + alpha_b)*(np.linalg.norm(R_P - R_C)**2))**0.5
-        
-        term3 = F_0(t)
-
-        return term1*term2*term3
+        return nucInt1s(R_a,R_b,alpha_a,alpha_b,R_C,Z)
 
     def twoElecInt(self,a,b,c,d):
         alpha_a = self.alphas[a]
@@ -180,16 +165,83 @@ class Rep1sGTO(Representation):
         R_c = self.basisPositions[c]
         R_d = self.basisPositions[d]
 
-        R_P = (alpha_a*R_a + alpha_c*R_c)/(alpha_a + alpha_c)
-        R_Q = (alpha_b*R_b + alpha_d*R_d)/(alpha_b + alpha_d)
+        return twoElecInt2s(R_a,R_b,R_c,R_d,alpha_a,alpha_b,alpha_c,alpha_d)
 
-        term1 = 2*(np.pi**2.5)/((alpha_a + alpha_c)*(alpha_b + alpha_d)*((alpha_a + alpha_b + alpha_c + alpha_d)**0.5))
-        term2 = np.exp(-alpha_a*alpha_c*(np.linalg.norm(R_a - R_c)**2)/(alpha_a + alpha_c) - alpha_b*alpha_d*(np.linalg.norm(R_b - R_d)**2)/(alpha_b + alpha_d))
-        
-        
-        t = np.linalg.norm(R_P - R_Q)*((alpha_a + alpha_c)*(alpha_b + alpha_d)/(alpha_a + alpha_b + alpha_c + alpha_d))**0.5
-        
-        term3 = F_0(t)
+delta = 0.01
 
-        return term1*term2*term3
+def applyDir(func,values,types,alphas): #make neater, rename func
+    value = values.pop(0)
+    type = types.pop(0)
+    alpha = alphas.pop(0)
+    if values == []:
+        return func(value,alpha)
+    elif np.all(type == np.array([0,0,0])): #may want to add classes here to make it cleaner
+        return applyDir(partial(func,value,alpha),values,types,alphas)
+    else:
+        newFuc = (partial(func,value + delta*type,alpha).func - partial(func,value,alpha).func)/(2*delta*type)/(2*alpha)
+        return applyDir(newFuc,values,types,alphas) #need to look at how to get this to work
 
+class Rep1s2p(Representation):
+    def __init__(self,Zs,alphas,nuclearPositions,basisPositions,type):
+        self.alphas = alphas
+        self.basisPositions = basisPositions #all R's need to be arrays
+        self.type = type #[np.array(1,0,0),np,array(0,1,0),...] points in direction that the integral is performed, 0 if s
+
+        Representation.__init__(self,Zs,nuclearPositions,len(alphas))
+
+    def overLapInt(self,a,b):
+        alpha_a = self.alphas[a]
+        alpha_b = self.alphas[b]
+        R_a = self.basisPositions[a]
+        R_b = self.basisPositions[b]
+        type_a = self.type[a] #better name than type?
+        type_b = self.type[b]        
+        
+        return applyDir(overlap1s,[R_a,R_b],[type_a,type_b],[alpha_a,alpha_b])
+    
+    def kineticInt(self,a,b):
+        alpha_a = self.alphas[a]
+        alpha_b = self.alphas[b]
+        R_a = self.basisPositions[a]
+        R_b = self.basisPositions[b]
+        type_a = self.type[a]
+        type_b = self.type[b]
+
+        return applyDir(kineticInt1s,[R_a,R_b],[type_a,type_b],[alpha_a,alpha_b])
+    
+    def nucInt(self,a,b,R_C,Z):
+        alpha_a = self.alphas[a]
+        alpha_b = self.alphas[b]
+        R_a = self.basisPositions[a]
+        R_b = self.basisPositions[b]
+        type_a = self.type[a]
+        type_b = self.type[b]
+
+        nucInt1sZR_C = lambda R_a,a,R_b,b: nucInt1s(R_a,a,R_b,b,R_C,Z)
+        return applyDir(nucInt1sZR_C,[R_a,R_b],[type_a,type_b],[alpha_a,alpha_b])
+
+    def twoElecInt(self,a,b,c,d):
+        alpha_a = self.alphas[a]
+        alpha_b = self.alphas[b]
+        alpha_c = self.alphas[c]
+        alpha_d = self.alphas[d]
+        R_a = self.basisPositions[a]
+        R_b = self.basisPositions[b]
+        R_c = self.basisPositions[c]
+        R_d = self.basisPositions[d]
+        type_a = self.type[a]
+        type_b = self.type[b]
+        type_c = self.type[c]
+        type_d = self.type[d]
+
+        
+
+        return applyDir(twoElecInt2s,[R_a,R_b,R_c,R_d],[type_a,type_b,type_c,type_d],[alpha_a,alpha_b,alpha_c,alpha_d])
+
+
+        
+
+
+        
+
+        

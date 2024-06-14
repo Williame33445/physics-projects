@@ -5,7 +5,7 @@ def takeGroundEigStates(sortedStates,N):
     return sortedStates[:N]
      
 
-def iterateHF(ups,downs,rep,E,maxError,takeTargetEigStates): 
+def iterateHF(ups,downs,rep,E,maxError,takeTargetEigStates,depth=0): 
     FPlus = rep.F(ups,downs) #ups and downs need to be normalised before
     FMinus = rep.F(downs,ups)
 
@@ -23,9 +23,9 @@ def iterateHF(ups,downs,rep,E,maxError,takeTargetEigStates):
     ENew = rep.findE(ocuppiedStates)
     
 
-    if abs(ENew - E) < maxError:
+    if abs(ENew - E) < maxError or depth>100:
             return ENew
     else:
         upsNew = [s["state"] for s in ocuppiedStates if s["spin"] == "up"]
         downsNew = [s["state"] for s in ocuppiedStates if s["spin"] == "down"]
-        return iterateHF(upsNew,downsNew,rep,ENew,maxError,takeTargetEigStates)
+        return iterateHF(upsNew,downsNew,rep,ENew,maxError,takeTargetEigStates,depth+1)
