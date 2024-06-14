@@ -3,12 +3,13 @@ from scipy import special as sp
 
 
 def F_0(t):
-    if t == 0:
+    if np.any(t == 0):
         return 1 
     else:
         return np.sqrt(np.pi)*sp.erf(t)/(2*t)
 
 def overlap1s(R_a,alpha_a,R_b,alpha_b):
+    
     term1 = (np.pi/(alpha_a + alpha_b))**1.5
     term2 = np.exp(-(alpha_a*alpha_b)*(np.linalg.norm(R_a - R_b)**2)/(alpha_a + alpha_b))
     return term1*term2

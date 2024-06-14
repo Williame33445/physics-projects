@@ -1,8 +1,14 @@
 from abc import abstractmethod, ABC
 import numpy as np 
-from GTO1s_matrix_elements import *
+import os
+import sys
 from functools import partial
+from scipy import misc
 
+sys.path.append(os.path.abspath("."))
+
+from electronic_structure.hartree_fock.GTO1s_matrix_elements import *
+from electronic_structure.hartree_fock.Hartree_Fock import *
 
 
 
@@ -21,8 +27,6 @@ class Representation(ABC):
         self.S = self.findS()
         self.h = self.findh()
         self.twoElecInts = self.findTwoElecInts()
-
-        print(self.S)
 
         self.invS = np.linalg.inv(self.S)
 
@@ -60,7 +64,7 @@ class Representation(ABC):
         for i,c_i in enumerate(C):
             for j,c_j in enumerate(C):
                 innerProduct += c_i*c_j*self.S[i][j]
-
+    
         return C/(innerProduct**0.5)
     
     def normaliseList(self,lst):
@@ -145,7 +149,7 @@ class Rep1sGTO(Representation):
         R_a = self.basisPositions[a]
         R_b = self.basisPositions[b]
 
-        return kineticInt1s(R_a,R_b,alpha_a,alpha_b)
+        return kineticInt1s(R_a,alpha_a,R_b,alpha_b)
     
     def nucInt(self,a,b,R_C,Z):
         alpha_a = self.alphas[a]
@@ -153,7 +157,7 @@ class Rep1sGTO(Representation):
         R_a = self.basisPositions[a]
         R_b = self.basisPositions[b]
 
-        return nucInt1s(R_a,R_b,alpha_a,alpha_b,R_C,Z)
+        return nucInt1s(R_a,alpha_a,R_b,alpha_b,R_C,Z)
 
     def twoElecInt(self,a,b,c,d):
         alpha_a = self.alphas[a]
@@ -165,21 +169,23 @@ class Rep1sGTO(Representation):
         R_c = self.basisPositions[c]
         R_d = self.basisPositions[d]
 
-        return twoElecInt2s(R_a,R_b,R_c,R_d,alpha_a,alpha_b,alpha_c,alpha_d)
+        return twoElecInt2s(R_a,alpha_a,R_b,alpha_b,R_c,alpha_c,R_d,alpha_d)
 
-delta = 0.01
+delta = 0.1
 
 def applyDir(func,values,types,alphas): #make neater, rename func
-    value = values.pop(0)
-    type = types.pop(0)
-    alpha = alphas.pop(0)
-    if values == []:
-        return func(value,alpha)
-    elif np.all(type == np.array([0,0,0])): #may want to add classes here to make it cleaner
-        return applyDir(partial(func,value,alpha),values,types,alphas)
+
+    if len(values) == 1: #clean up
+        return func(values[0],alphas[0])
+    newValues = values[1:]
+    newTypes = types[1:]
+    newAlphas = alphas[1:]
+    if np.all(types[0] == np.array([0,0,0])): #may want to add classes here to make it cleaner
+        return applyDir(partial(func,values[0],alphas[0]),newValues,newTypes,newAlphas)
     else:
-        newFuc = (partial(func,value + delta*type,alpha).func - partial(func,value,alpha).func)/(2*delta*type)/(2*alpha)
-        return applyDir(newFuc,values,types,alphas) #need to look at how to get this to work
+        upper = applyDir(partial(func,values[0] + delta*types[0],alphas[0]),newValues,newTypes,newAlphas)
+        lower =  applyDir(partial(func,values[0],alphas[0]),newValues,newTypes,newAlphas)
+        return (upper-lower)/(2*alphas[0]*delta)
 
 class Rep1s2p(Representation):
     def __init__(self,Zs,alphas,nuclearPositions,basisPositions,type):
@@ -195,7 +201,8 @@ class Rep1s2p(Representation):
         R_a = self.basisPositions[a]
         R_b = self.basisPositions[b]
         type_a = self.type[a] #better name than type?
-        type_b = self.type[b]        
+        type_b = self.type[b]
+     
         
         return applyDir(overlap1s,[R_a,R_b],[type_a,type_b],[alpha_a,alpha_b])
     
