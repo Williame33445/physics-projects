@@ -5,10 +5,10 @@ import sys
 from functools import partial
 from scipy import misc
 
-sys.path.append(os.path.abspath("."))
 
-from electronic_structure.hartree_fock.GTO1s_matrix_elements import *
-from electronic_structure.hartree_fock.Hartree_Fock import *
+from electronic_structure.hartree_fock.molecular_int.GTO1s_matrix_elements import *
+from Hartree_Fock import *
+from molecular_int.MolecularIntegrals import *
 
 
 
@@ -171,27 +171,12 @@ class Rep1sGTO(Representation):
 
         return twoElecInt2s(R_a,alpha_a,R_b,alpha_b,R_c,alpha_c,R_d,alpha_d)
 
-delta = 0.1
-
-def applyDir(func,values,types,alphas): #make neater, rename func
-
-    if len(values) == 1: #clean up
-        return func(values[0],alphas[0])
-    newValues = values[1:]
-    newTypes = types[1:]
-    newAlphas = alphas[1:]
-    if np.all(types[0] == np.array([0,0,0])): #may want to add classes here to make it cleaner
-        return applyDir(partial(func,values[0],alphas[0]),newValues,newTypes,newAlphas)
-    else:
-        upper = applyDir(partial(func,values[0] + delta*types[0],alphas[0]),newValues,newTypes,newAlphas)
-        lower =  applyDir(partial(func,values[0],alphas[0]),newValues,newTypes,newAlphas)
-        return (upper-lower)/(2*alphas[0]*delta)
 
 class Rep1s2p(Representation):
     def __init__(self,Zs,alphas,nuclearPositions,basisPositions,type):
         self.alphas = alphas
         self.basisPositions = basisPositions #all R's need to be arrays
-        self.type = type #[np.array(1,0,0),np,array(0,1,0),...] points in direction that the integral is performed, 0 if s
+        self.type = type #[[i,j,k],...] points in direction that the integral is performed, 0 if s
 
         Representation.__init__(self,Zs,nuclearPositions,len(alphas))
 
@@ -200,11 +185,10 @@ class Rep1s2p(Representation):
         alpha_b = self.alphas[b]
         R_a = self.basisPositions[a]
         R_b = self.basisPositions[b]
-        type_a = self.type[a] #better name than type?
-        type_b = self.type[b]
-     
+        type_a = self.type[a] #need to be tuples, also better names?
+        type_b = self.type[b]     
         
-        return applyDir(overlap1s,[R_a,R_b],[type_a,type_b],[alpha_a,alpha_b])
+        return overlap(alpha_a,type_a,R_a,alpha_b,type_b,R_b)
     
     def kineticInt(self,a,b):
         alpha_a = self.alphas[a]
@@ -214,7 +198,9 @@ class Rep1s2p(Representation):
         type_a = self.type[a]
         type_b = self.type[b]
 
-        return applyDir(kineticInt1s,[R_a,R_b],[type_a,type_b],[alpha_a,alpha_b])
+        
+
+        return 2*kinetic(alpha_a,type_a,R_a,alpha_b,type_b,R_b)
     
     def nucInt(self,a,b,R_C,Z):
         alpha_a = self.alphas[a]
@@ -224,9 +210,7 @@ class Rep1s2p(Representation):
         type_a = self.type[a]
         type_b = self.type[b]
 
-        nucInt1sZR_C = lambda R_a,a,R_b,b: nucInt1s(R_a,a,R_b,b,R_C,Z)
-        return applyDir(nucInt1sZR_C,[R_a,R_b],[type_a,type_b],[alpha_a,alpha_b])
-
+        return -Z*nuclear_attraction(alpha_a,type_a,R_a,alpha_b,type_b,R_b,R_C)
     def twoElecInt(self,a,b,c,d):
         alpha_a = self.alphas[a]
         alpha_b = self.alphas[b]
@@ -241,14 +225,5 @@ class Rep1s2p(Representation):
         type_c = self.type[c]
         type_d = self.type[d]
 
-        
 
-        return applyDir(twoElecInt2s,[R_a,R_b,R_c,R_d],[type_a,type_b,type_c,type_d],[alpha_a,alpha_b,alpha_c,alpha_d])
-
-
-        
-
-
-        
-
-        
+        return electron_repulsion(alpha_a,type_a,R_a,alpha_b,type_b,R_b,alpha_c,type_c,R_c,alpha_d,type_d,R_d)

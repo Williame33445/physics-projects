@@ -24,6 +24,7 @@ def iterateHF(ups,downs,rep,E,maxError,takeTargetEigStates,depth=0):
     
 
     if abs(ENew - E) < maxError or depth>100:
+            print(ocuppiedStates)
             return ENew
     else:
         upsNew = [s["state"] for s in ocuppiedStates if s["spin"] == "up"]

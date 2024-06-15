@@ -14,7 +14,7 @@ typePy = [np.array([0,1,0]),np.array([0,1,0]),np.array([0,1,0])]
 typePz = [np.array([0,0,1]),np.array([0,0,1]),np.array([0,0,1])]
 
 
-#basis is 15
+# #basis is 15
 
 alphas = alphaS + alphaP + alphaP + alphaP
 
@@ -24,13 +24,35 @@ nucPos = [np.array([0,0,0])]
 type = typeS + typePx + typePy + typePz
 
 rep = Rep1s2p(Zs,alphas,nucPos,basisPos,type)
+    
 
 
-
-ups = [[1,1,1,1,1,1,1,1,1,1,0,0,0,0,0]]
-downs = [[1,1,1,1,1,1,1,1,1,0,0,0,0,0,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
+ups = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
+downs = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
 EGuess = -2
 maxError = 0.01
 
 print(iterateHF(rep.normaliseList(ups),rep.normaliseList(downs),rep,EGuess,maxError,lambda s: takeGroundEigStates(s,3)))
+
+
+#5-21G
+#alphas = [0.298073,1.242567,5.782948,38.474970]
+# alphas =
+
+# basisPos = [np.array([0,0,0]),np.array([0,0,0]),np.array([0,0,0])]
+# Zs = [2]
+# nucPos = [np.array([0,0,0])]
+
+# rep1 = Rep1s2p(Zs,alphas,nucPos,basisPos,basisPos)
+# rep2 = Rep1sGTO(Zs,alphas,nucPos,basisPos)
+
+# print(rep1.twoElecInts-rep2.twoElecInts)
+
+# ups = [[1,1,1]]
+# downs = [[1,1,1]]
+# EGuess = -2
+# maxError = 0.01
+
+# print(iterateHF(rep1.normaliseList(ups),rep1.normaliseList(downs),rep1,EGuess,maxError,lambda s: takeGroundEigStates(s,2)))
+# print(iterateHF(rep2.normaliseList(ups),rep2.normaliseList(downs),rep2,EGuess,maxError,lambda s: takeGroundEigStates(s,2)))
 
