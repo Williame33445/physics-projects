@@ -1,5 +1,7 @@
 """
 This code was taken from: https://github.com/jjgoings/McMurchie-Davidson/tree/master?tab=BSD-3-Clause-1-ov-file#readme
+It has been slightly modified.
+
 
 BSD 3-Clause License
 
@@ -84,69 +86,6 @@ def overlap(a,lmn1,A,b,lmn2,B):
     S3 = E(n1,n2,0,A[2]-B[2],a,b) # Z
     return S1*S2*S3*np.power(np.pi/(a+b),1.5) 
 
-def S(a,b):
-    '''Evaluates overlap between two contracted Gaussians
-       Returns float.
-       Arguments:
-       a: contracted Gaussian 'a', BasisFunction object
-       b: contracted Gaussian 'b', BasisFunction object
-    '''
-    s = 0.0
-    for ia, ca in enumerate(a.coefs):
-        for ib, cb in enumerate(b.coefs):
-            s += a.norm[ia]*b.norm[ib]*ca*cb*\
-                     overlap(a.exps[ia],a.shell,a.origin,
-                     b.exps[ib],b.shell,b.origin)
-    return s
-
-class BasisFunction(object):
-    ''' A class that contains all our basis function data
-        Attributes:
-        origin: array/list containing the coordinates of the Gaussian origin
-        shell:  tuple of angular momentum
-        exps:   list of primitive Gaussian exponents
-        coefs:  list of primitive Gaussian coefficients
-        norm:   list of normalization factors for Gaussian primitives
-    '''
-    def __init__(self,origin=[0.0,0.0,0.0],shell=(0,0,0),num_exps=None,exps=[],coefs=[]):
-        self.origin = np.asarray(origin)
-        self.shell = shell
-        self.exps  = exps
-        self.coefs = coefs
-        self.num_exps = len(self.exps)
-        self.norm = None
-        self.normalize()
-
-    def normalize(self):
-        ''' Routine to normalize the basis functions, in case they
-            do not integrate to unity.
-        '''
-        l,m,n = self.shell
-        L = l+m+n
-        # self.norm is a list of length equal to number primitives
-        # normalize primitives first (PGBFs)
-        self.norm = np.sqrt(np.power(2,2*(l+m+n)+1.5)*
-                        np.power(self.exps,l+m+n+1.5)/
-                        fact2(2*l-1)/fact2(2*m-1)/
-                        fact2(2*n-1)/np.power(np.pi,1.5))
-
-        # now normalize the contracted basis functions (CGBFs)
-        # Eq. 1.44 of Valeev integral whitepaper
-        prefactor = np.power(np.pi,1.5)*\
-            fact2(2*l - 1)*fact2(2*m - 1)*fact2(2*n - 1)/np.power(2.0,L)
-
-        N = 0.0
-        num_exps = len(self.exps)
-        for ia in range(num_exps):
-            for ib in range(num_exps):
-                N += self.norm[ia]*self.norm[ib]*self.coefs[ia]*self.coefs[ib]/\
-                         np.power(self.exps[ia] + self.exps[ib],L+1.5)
-
-        N *= prefactor
-        N = np.power(N,-0.5)
-        for ia in range(num_exps):
-            self.coefs[ia] *= N
-
 def kinetic(a,lmn1,A,b,lmn2,B):
     ''' Evaluates kinetic energy integral between two Gaussians
         Returns a float.
@@ -170,21 +109,6 @@ def kinetic(a,lmn1,A,b,lmn2,B):
                   m2*(m2-1)*overlap(a,(l1,m1,n1),A,b,(l2,m2-2,n2),B) +
                   n2*(n2-1)*overlap(a,(l1,m1,n1),A,b,(l2,m2,n2-2),B))
     return term0+term1+term2
-
-def T(a,b):
-    '''Evaluates kinetic energy between two contracted Gaussians
-       Returns float.
-       Arguments:
-       a: contracted Gaussian 'a', BasisFunction object
-       b: contracted Gaussian 'b', BasisFunction object
-    '''
-    t = 0.0
-    for ia, ca in enumerate(a.coefs):
-        for ib, cb in enumerate(b.coefs):
-            t += a.norm[ia]*b.norm[ib]*ca*cb*\
-                     kinetic(a.exps[ia],a.shell,a.origin,\
-                     b.exps[ib],b.shell,b.origin)
-    return t
 
 def R(t,u,v,n,p,PCx,PCy,PCz,RPC):
     ''' Returns the Coulomb auxiliary Hermite integrals 
@@ -250,23 +174,7 @@ def nuclear_attraction(a,lmn1,A,b,lmn2,B,C):
     val *= 2*np.pi/p 
     return val
 
-def V(a,b,C):
-    '''Evaluates overlap between two contracted Gaussians
-       Returns float.
-       Arguments:
-       a: contracted Gaussian 'a', BasisFunction object
-       b: contracted Gaussian 'b', BasisFunction object
-       C: center of nucleus
-    '''
-    v = 0.0
-    for ia, ca in enumerate(a.coefs):
-        for ib, cb in enumerate(b.coefs):
-            v += a.norm[ia]*b.norm[ib]*ca*cb*\
-                     nuclear_attraction(a.exps[ia],a.shell,a.origin,
-                     b.exps[ib],b.shell,b.origin,C)
-    return v
-
-def electron_repulsion(a,lmn1,A,b,lmn2,B,c,lmn3,C,d,lmn4,D):
+def electron_repulsion(a,lmn1,A,b,lmn2,B,c,lmn3,C,d,lmn4,D): 
     ''' Evaluates kinetic energy integral between two Gaussians
         Returns a float.
         a,b,c,d:   orbital exponent on Gaussian 'a','b','c','d'
@@ -279,11 +187,11 @@ def electron_repulsion(a,lmn1,A,b,lmn2,B,c,lmn3,C,d,lmn4,D):
     l2,m2,n2 = lmn2
     l3,m3,n3 = lmn3
     l4,m4,n4 = lmn4
-    p = a+b # composite exponent for P (from Gaussians 'a' and 'b')
-    q = c+d # composite exponent for Q (from Gaussians 'c' and 'd')
+    p = a+c
+    q = b+d 
     alpha = p*q/(p+q)
-    P = gaussian_product_center(a,A,b,B) # A and B composite center
-    Q = gaussian_product_center(c,C,d,D) # C and D composite center
+    P = gaussian_product_center(a,A,c,C) # A and B composite center
+    Q = gaussian_product_center(b,B,d,D) # C and D composite center
     RPQ = np.linalg.norm(P-Q)
 
     val = 0.0
@@ -293,12 +201,12 @@ def electron_repulsion(a,lmn1,A,b,lmn2,B,c,lmn3,C,d,lmn4,D):
                 for tau in range(l3+l4+1):
                     for nu in range(m3+m4+1):
                         for phi in range(n3+n4+1):
-                            val += E(l1,l2,t,A[0]-B[0],a,b) * \
-                                   E(m1,m2,u,A[1]-B[1],a,b) * \
-                                   E(n1,n2,v,A[2]-B[2],a,b) * \
-                                   E(l3,l4,tau,C[0]-D[0],c,d) * \
-                                   E(m3,m4,nu ,C[1]-D[1],c,d) * \
-                                   E(n3,n4,phi,C[2]-D[2],c,d) * \
+                            val += E(l1,l3,t,A[0]-C[0],a,c) * \
+                                   E(m1,m3,u,A[1]-C[1],a,c) * \
+                                   E(n1,n3,v,A[2]-C[2],a,c) * \
+                                   E(l2,l4,tau,B[0]-D[0],b,d) * \
+                                   E(m2,m4,nu ,B[1]-D[1],b,d) * \
+                                   E(n2,n4,phi,B[2]-D[2],b,d) * \
                                    np.power(-1,tau+nu+phi) * \
                                    R(t+tau,u+nu,v+phi,0,\
                                        alpha,P[0]-Q[0],P[1]-Q[1],P[2]-Q[2],RPQ)
@@ -306,24 +214,3 @@ def electron_repulsion(a,lmn1,A,b,lmn2,B,c,lmn3,C,d,lmn4,D):
     val *= 2*np.power(np.pi,2.5)/(p*q*np.sqrt(p+q))
     return val
 
-def ERI(a,b,c,d):
-    '''Evaluates overlap between two contracted Gaussians
-        Returns float.
-        Arguments:
-        a: contracted Gaussian 'a', BasisFunction object
-        b: contracted Gaussian 'b', BasisFunction object
-        c: contracted Gaussian 'b', BasisFunction object
-        d: contracted Gaussian 'b', BasisFunction object
-    '''
-    eri = 0.0
-    for ja, ca in enumerate(a.coefs):
-        for jb, cb in enumerate(b.coefs):
-            for jc, cc in enumerate(c.coefs):
-                for jd, cd in enumerate(d.coefs):
-                    eri += a.norm[ja]*b.norm[jb]*c.norm[jc]*d.norm[jd]*\
-                             ca*cb*cc*cd*\
-                             electron_repulsion(a.exps[ja],a.shell,a.origin,\
-                                                b.exps[jb],b.shell,b.origin,\
-                                                c.exps[jc],c.shell,c.origin,\
-                                                d.exps[jd],d.shell,d.origin)
-    return eri

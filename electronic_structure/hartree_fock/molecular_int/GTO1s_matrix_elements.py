@@ -3,7 +3,7 @@ from scipy import special as sp
 
 
 def F_0(t):
-    if np.any(t == 0):
+    if t == 0:
         return 1 
     else:
         return np.sqrt(np.pi)*sp.erf(t)/(2*t)

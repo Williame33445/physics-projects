@@ -6,7 +6,7 @@ from functools import partial
 from scipy import misc
 
 
-from electronic_structure.hartree_fock.molecular_int.GTO1s_matrix_elements import *
+from molecular_int.GTO1s_matrix_elements import *
 from Hartree_Fock import *
 from molecular_int.MolecularIntegrals import *
 
