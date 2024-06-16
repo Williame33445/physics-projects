@@ -23,28 +23,34 @@ class Representation(ABC):
     def findS(self):
         S = np.empty([self.repNumb,self.repNumb])
         for i in range(self.repNumb):
-            for j in range(self.repNumb):
+            for j in range(i+1):
                 integralij = self.overLapInt(i,j)
                 S[i,j] = integralij
+                S[j,i] = integralij
         return S
     
     def findh(self):
         h = np.empty([self.repNumb,self.repNumb])
         for i in range(self.repNumb):
-            for j in range(self.repNumb):
+            for j in range(i+1):
                 kineticIntegral = self.kineticInt(i,j) 
                 nuclearIntegral = sum([self.nucInt(i,j,R,self.Zs[n]) for n,R in enumerate(self.nuclearPositions)])
                 integral = kineticIntegral + nuclearIntegral
                 h[i,j] = integral
+                h[j,i] = integral
         return h
     
     def findTwoElecInts(self):
         twoElecInts = np.empty([self.repNumb,self.repNumb,self.repNumb,self.repNumb])
         for i in range(self.repNumb):
-            for k in range(self.repNumb):
+            for k in range(i+1):
                 for j in range(self.repNumb):
-                    for l in range(self.repNumb):
-                        twoElecInts[i,j,k,l] = self.twoElecInt(i,j,k,l) #this can be done with 1/2 the efficiency
+                    for l in range(j+1):
+                        integral = self.twoElecInt(i,j,k,l)
+                        twoElecInts[i,j,k,l] = integral
+                        twoElecInts[k,j,i,l] = integral
+                        twoElecInts[i,l,k,j] = integral
+                        twoElecInts[k,l,i,j] = integral
         return twoElecInts
     
     def normalise(self,C):
