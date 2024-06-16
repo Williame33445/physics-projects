@@ -20,7 +20,7 @@ def kineticInt1s(R_a,alpha_a,R_b,alpha_b):
     term3 = (np.pi/(alpha_a + alpha_b))**1.5
     term4 = np.exp(-(alpha_a*alpha_b)*(np.linalg.norm(R_a - R_b)**2)/(alpha_a + alpha_b))
 
-    return term1*term2*term3*term4
+    return 0.5*term1*term2*term3*term4
 
 def nucInt1s(R_a,alpha_a,R_b,alpha_b,R_C,Z):
     R_P = (alpha_a*R_a + alpha_b*R_b)/(alpha_a + alpha_b)

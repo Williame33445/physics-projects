@@ -79,8 +79,8 @@ def overlap(a,lmn1,A,b,lmn2,B):
         A:    list containing origin of Gaussian 'a', e.g. [1.0, 2.0, 0.0]
         B:    list containing origin of Gaussian 'b'
     '''
-    l1,m1,n1 = lmn1 # shell angular momentum on Gaussian 'a'
-    l2,m2,n2 = lmn2 # shell angular momentum on Gaussian 'b'
+    [l1,m1,n1] = lmn1 # shell angular momentum on Gaussian 'a'
+    [l2,m2,n2] = lmn2 # shell angular momentum on Gaussian 'b'
     S1 = E(l1,l2,0,A[0]-B[0],a,b) # X
     S2 = E(m1,m2,0,A[1]-B[1],a,b) # Y
     S3 = E(n1,n2,0,A[2]-B[2],a,b) # Z
@@ -174,7 +174,7 @@ def nuclear_attraction(a,lmn1,A,b,lmn2,B,C):
     val *= 2*np.pi/p 
     return val
 
-def electron_repulsion(a,lmn1,A,b,lmn2,B,c,lmn3,C,d,lmn4,D): 
+def electron_repulsion(a,lmn1,A,b,lmn2,B,c,lmn3,C,d,lmn4,D):
     ''' Evaluates kinetic energy integral between two Gaussians
         Returns a float.
         a,b,c,d:   orbital exponent on Gaussian 'a','b','c','d'
@@ -187,11 +187,11 @@ def electron_repulsion(a,lmn1,A,b,lmn2,B,c,lmn3,C,d,lmn4,D):
     l2,m2,n2 = lmn2
     l3,m3,n3 = lmn3
     l4,m4,n4 = lmn4
-    p = a+c
-    q = b+d 
+    p = a+b # composite exponent for P (from Gaussians 'a' and 'b')
+    q = c+d # composite exponent for Q (from Gaussians 'c' and 'd')
     alpha = p*q/(p+q)
-    P = gaussian_product_center(a,A,c,C) # A and B composite center
-    Q = gaussian_product_center(b,B,d,D) # C and D composite center
+    P = gaussian_product_center(a,A,b,B) # A and B composite center
+    Q = gaussian_product_center(c,C,d,D) # C and D composite center
     RPQ = np.linalg.norm(P-Q)
 
     val = 0.0
@@ -201,16 +201,15 @@ def electron_repulsion(a,lmn1,A,b,lmn2,B,c,lmn3,C,d,lmn4,D):
                 for tau in range(l3+l4+1):
                     for nu in range(m3+m4+1):
                         for phi in range(n3+n4+1):
-                            val += E(l1,l3,t,A[0]-C[0],a,c) * \
-                                   E(m1,m3,u,A[1]-C[1],a,c) * \
-                                   E(n1,n3,v,A[2]-C[2],a,c) * \
-                                   E(l2,l4,tau,B[0]-D[0],b,d) * \
-                                   E(m2,m4,nu ,B[1]-D[1],b,d) * \
-                                   E(n2,n4,phi,B[2]-D[2],b,d) * \
+                            val += E(l1,l2,t,A[0]-B[0],a,b) * \
+                                   E(m1,m2,u,A[1]-B[1],a,b) * \
+                                   E(n1,n2,v,A[2]-B[2],a,b) * \
+                                   E(l3,l4,tau,C[0]-D[0],c,d) * \
+                                   E(m3,m4,nu ,C[1]-D[1],c,d) * \
+                                   E(n3,n4,phi,C[2]-D[2],c,d) * \
                                    np.power(-1,tau+nu+phi) * \
                                    R(t+tau,u+nu,v+phi,0,\
                                        alpha,P[0]-Q[0],P[1]-Q[1],P[2]-Q[2],RPQ)
 
     val *= 2*np.power(np.pi,2.5)/(p*q*np.sqrt(p+q))
     return val
-
