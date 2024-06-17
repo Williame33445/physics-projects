@@ -8,7 +8,7 @@ This project uses the Hartree-Fock method to describe simple atoms and molecules
 
 The full Hamiltonian of a molecular system is given by $(1)$.
 
-$$\hat{H} = \sum\limits^N_{i=1} \frac{\hat{P}_i^2}{2m_i} +  \sum\limits^K_{n=1} \frac{\hat{P}_n^2}{2M_n}\\ + \frac{1}{4\pi\epsilon_0}\frac{1}{2}\sum\limits^N_{i,j=1;i\neq j}\frac{e^2}{|\vec{r}_i - \vec{r}_j|} \\- \frac{1}{4\pi\epsilon_0}\sum\limits^N_{i=1}\sum\limits^K_{n=1}\frac{e^2}{|\vec{r}_i - \vec{R}_n|}\\ + \frac{1}{4\pi\epsilon_0}\frac{1}{2}\sum\limits^K_{n,m=1;n\neq m}\frac{e^2}{|\vec{R}_n - \vec{R}_m|}\tag{1}$$
+![alt text](https://raw.githubusercontent.com/Williame33445/physics-projects/main/electronic_structure/hartree_fock/electronic-hamiltonian.png)
 
 One of the main problems in molecular physics is find the eigenstates of $(1)$. It turns out that analytical solutions are not possible in most cases, meaning numerical methods need to be applied. 
 
