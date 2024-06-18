@@ -12,21 +12,26 @@ from electronic_structure.hartree_fock.representation import *
 class Test_Hartree_Fock(unittest.TestCase):
 
     def testHeliumGround(self):
+        #define simulation parameters
         alphas = [0.298073,1.242567,5.782948,38.474970]
         basisPos = [np.array([0,0,0]),np.array([0,0,0]),np.array([0,0,0]),np.array([0,0,0])]
         Zs = [2]
         nucPos = [np.array([0,0,0])]
+        maxError = 1E-4
 
-        rep = Rep1sGTO(Zs,alphas,nucPos,basisPos)
+        #define representation class
+        rep = RepGTO(Zs,alphas,nucPos,basisPos,basisPos)
+
+        #define intial guess
         ups = [[1,1,1,1]]
         downs = [[1,1,1,1]]
-        EGuess = 0
-        maxError = 0.1
+        EGuess = -2.8
+        expected = -2.8551714954912644
 
-        result = iterateHF(rep.normaliseList(ups),rep.normaliseList(downs),rep,EGuess,maxError,lambda s: takeGroundEigStates(s,2))
-        expected = -2.81
+        #run simulation and print energy
+        E,states = iterateHF(rep.normaliseList(ups),rep.normaliseList(downs),rep,EGuess,maxError,lambda s: takeGroundEigStates(s,2))
 
-        difference = np.round(result - expected, decimals=2)
+        difference = np.round(E - expected, decimals=1)
             
         self.assertEqual(0,difference)
         

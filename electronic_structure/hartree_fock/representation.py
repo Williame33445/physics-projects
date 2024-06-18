@@ -1,10 +1,13 @@
 from abc import abstractmethod, ABC
 import numpy as np 
+import sys
+import os
+
+sys.path.append(os.path.abspath("."))
 
 
-from molecular_int.GTO1s_matrix_elements import *
-from Hartree_Fock import *
-from molecular_int.MolecularIntegrals import *
+from electronic_structure.hartree_fock.molecular_int.GTO1s_matrix_elements import *
+from electronic_structure.hartree_fock.molecular_int.MolecularIntegrals import *
 
 
 class Representation(ABC):
