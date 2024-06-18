@@ -1,6 +1,6 @@
 # Hartree-Fock project
 
-This project uses the Hartree-Fock method to describe simple atoms and molecules. This project used (Thijssen, 2013, p. 43) as a guide, though note that the book does not give guidence for results beyond Helium. 
+This project uses the Hartree-Fock method to describe simple atoms and molecules. This project used (Thijssen, 2013, p. 43) as a guide, though it goes further than the problems specified in the book. 
 
 ## Theory
 
@@ -10,22 +10,26 @@ The full Hamiltonian of a molecular system is given by $(1)$.
 
 ![alt text](https://raw.githubusercontent.com/Williame33445/physics-projects/main/electronic_structure/hartree_fock/electronic-hamiltonian.png)
 
-One of the main problems in molecular physics is find the eigenstates of $(1)$. It turns out that analytical solutions are not possible in most cases, meaning numerical methods need to be applied. 
+One of the main problems in molecular physics is to find the eigenstates of $(1)$. It turns out that in most cases analytical solutions are not possible, meaning numerical methods need to be applied.
 
-The Hartree-Fock method uses the Born-Oppenheimer approximation to decouple the electron and nuclei parts (Griffiths, 2018, p. 428). It then guesses that the eigenstate is a Slater determinant (Thijssen, 2013, p. 53) and uses the variational princple to find an upper bound of the eigenstate. The eigenequation then reduces to $N$ equations in the form of $(2)$ where $\psi_k(\vec{r},m_s)$ is a component of the Slater determinant ($m_s$ is the spin component in the z-direction), $\hat{F}$ is called the Fock operator (derived in  (Thijssen, 2013, p. 56)) and $\epsilon_k$ is related to the energy of the total eigenstate.
+The Hartree-Fock method is a possible numerical method. It uses the Born-Oppenheimer approximation to decouple the electron and nuclei parts (Griffiths, 2018, p. 428),  guesses that the eigenstate is a Slater determinant (Thijssen, 2013, p. 53) and applies variational methods to find an upper bound of the eigenstates. This process reduces the eigen-equation to $N$ equations in the form of $(2)$.
 
 $$\hat{F}\psi_k(\vec{r},m_s) = \epsilon_k\psi_k(\vec{r},m_s)\tag{2}$$
 
-As $\hat{F}$ contians $\psi_k(\vec{r},m_s)$, $(2)$ forms a self-consistency equation. Meaning $(2)$ doesn't take the form of an eigenequation, making it much harder to solve.
+Where $\psi_k(\vec{r},m_s)$ is a component of the Slater determinant, $\hat{F}$ is called the Fock operator (derived in  (Thijssen, 2013, p. 56)) and $\epsilon_k$ is related to the energy of the total eigenstate.
+
+$\hat{F}$ contains $\psi_k(\vec{r},m_s)$ s in its definition, meaning $(2)$ forms a self-consistency equation. This meaning $(2)$ does not take the form of an eigen-equation, making it much harder to solve.
 
 
 To solve (2), the variational method is applied again. An upper bound of the total electron energy can then be deduced from $(3)$.
 
 $$E = \frac{1}{2}\sum\limits^N_{k=1}\epsilon_k + \bra{\psi_k}-\frac{\nabla^2}{2} + \sum_n\frac{Z_n}{|\vec{r}-\vec{R}_n|}\ket{\psi_k}\tag{3}$$
 
-### Variational method
+This entire process is the Hatree-Fock method.
 
-The variational method guesses the general form of $\psi_k(\vec{r},m_s)$. For atomic systems, the most natural guess is a linear combination of Slater-type orbitals (STO). These take the form of $(4)$ (Slater, 1930, p.57).
+### Variational method for the Fock Equation
+
+The second application of the variational method guesses the general form of $\psi_k(\vec{r},m_s)$. For atomic systems, the most natural guess is a linear combination of Slater-type orbitals (STO). These take the form of $(4)$ (Slater, 1930, p.57).
 
 $$
 \psi_k(\vec{r},m_s) = \sum\limits_n A_n     r^{n-1}e^{-a_nr}Y_{lm}(\theta,\phi)\chi_{m_s}\tag{4}
@@ -33,22 +37,33 @@ $$
 
 The coefficients $a_n,A_n$ are then varied to find the stationary $\epsilon_k$; this corresponds to an upper bound of the eigenstate.
 
-However, due to integrals involving STO being hard to calcualte, its easier to use Guassian-type orbitals (GTO) (Goings, 2017). These take the form of $(5)$.
+However, due to integrals involving STO being hard to calculate, its usually easier to use Gaussian-type orbitals (GTO) (Goings, 2017). These take the form of $(5)$.
 
 $$
-\psi_k(x,y,z,m_s) = \sum\limits_{ijk} A_{ijk} x^iy^jz^ke^{-\alpha_{ijk}(x^2 + y^2 + z^2)}\chi_{m_s}\tag{4}
+\psi_k(x,y,z,m_s) = \sum\limits_{ijk} A_{ijk} x^iy^jz^ke^{-\alpha_{ijk}(x^2 + y^2 + z^2)}\chi_{m_s}\tag{5}
 $$  
 
-Again, the coefficients $a_n,A_n$ are then varied to find the stationary $\epsilon_k$. This is a non-linear problem.
+Again, the coefficients $a_{ijk},A_{ijk}$ are then varied to find the stationary $\epsilon_k$. 
 
+Whatever basis is chosen, the result is transforming the problem into a non-linear variational problem. While this can be solved directly, if the $\alpha_{ijk}$ s are deduced by some other method, the problem becomes solvable by (easier) linear methods. This is typically done by either fitting a set of GTO's to an appropriate STO or solving a simpler but appropriate non-linear problem (Thijssen, 2013, p. 67). This project doesn't cover these methods, it only considers the linear method. The $\alpha_{ijk}$ coefficients used are taken from (Thijssen, 2013, p. 35, p. 50) and (MolSSI, 2020).
 
-While the non-linear problem can be solved, if the $\alpha_{ijk}$ s are deduced, the problem becomes solvable by linear methods. This is typically done by either fitting a set of GTO to approriate STO or solving a simpler but appropriate non-linear problem (Thijssen, 2013, p. 67). These methods are not covered here and the $\alpha_n$ coefficents used are taken from (Thijssen, 2013, p. 35, p. 50) and (MolSSI, 2020).
-
-Given the $\alpha_{ijk}$ s, the variational problems can then be written in matrix form as $(5)$, where $F_{nm}^{\pm}$ are the matrix elements for the plus/minus parts of the GTO, $S$ is the GTO overlap matrix and $C_k^{\pm}$ is the representation of $\psi_k(\vec{r},\pm\frac{\hbar}{2})$ in the GTO basis (Thijssen, 2013, p. 64).
+Given the $\alpha_{ijk}$ s, the variational problems can then be written in matrix form as $(5)$.
 
 $$F^+C_k^+ = \epsilon_k^+SC_k^+,F^-C_k^- = \epsilon_k^-SC_k^-\tag{5}$$
 
-This equation can then be solved iteratively. $F$ is deduced for an intial guess of the $\psi_k(\vec{r},m_s)$ 's and the generalised eigenvalue problem is solved. This process is then repreated using the $\psi_k(\vec{r},m_s)$ 's found as the intial guess until the solution converges. These solutions can then be used to deduce an upper bound of the eigenstate.
+Where $F_{nm}^{\pm}$ are the matrix elements for the plus/minus parts of the GTO, $S$ is the GTO overlap matrix and $C_k^{\pm}$ is the representation of $\psi_k(\vec{r},\pm\frac{\hbar}{2})$ in the GTO basis (Thijssen, 2013, p. 64).
+
+This equation can then be solved iteratively. $F$ is deduced for an initial guess of the $\psi_k(\vec{r},m_s)$ 's and the generalised eigenvalue problem is solved. This process is then repeated, using the $\psi_k(\vec{r},m_s)$ 's found as the initial guess, until the solution converges. These solutions can then be used to deduce an upper bound of the eigenstate.
+
+## Implementation
+
+As any basis can be chosen for variational solutions to $(4)$, the matrix elements required to form equation $(5)$ are described in an abstract class called Representation. A subclass Representaion then corresponds to a certain basis. Two subclasses are defined: Rep1sGTO only uses the spherically symmetric Gaussian basis and RepGTO considers the general Gaussian basis. In principle, other bases could be added (eg. STO), however this is not implemented here. The matrix elements required for Rep1sGTO are defined in GTO1s_matrix_elements.py; for a derivation of these elements, see (Thijssen, 2013, p. 64). The matrix elements required for RepGTO are found with code taken from (Goings, 2017). These matrix elements are defined in MolecularIntegrals.py.
+
+In terms of the actual algorithm, this is implemented in Hartee_Fock.py as a recursive function called iterateHF. The eigenstate that is being calculated is determined by the getTargetEigStates function that is a parameter of iterateHF.
+
+Some simple examples of the simulation are given in hartree-fock-calculations.ipynb.
+
+## Results
 
 ## References
 

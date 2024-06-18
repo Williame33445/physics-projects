@@ -6,9 +6,17 @@ from molecular_int.GTO1s_matrix_elements import *
 from Hartree_Fock import *
 from molecular_int.MolecularIntegrals import *
 
-#holds and describes the representations of the matricies
 
 class Representation(ABC):
+    """
+    Abstract class that defines the general form of the representation.
+
+    Inputs:
+    Zs - list of nuclear numbers
+    nuclearPositions - list of nuclear positions
+    repNumb - number of functions in the basis
+    """
+
     def __init__(self,Zs,nuclearPositions,repNumb):
         self.Zs = Zs
         self.nuclearPositions = nuclearPositions 
@@ -21,6 +29,9 @@ class Representation(ABC):
 
 
     def findS(self):
+        """
+        Function that finds S matrix
+        """
         S = np.empty([self.repNumb,self.repNumb])
         for i in range(self.repNumb):
             for j in range(i+1):
@@ -30,6 +41,9 @@ class Representation(ABC):
         return S
     
     def findh(self):
+        """
+        Function that finds h matrix.
+        """
         h = np.empty([self.repNumb,self.repNumb])
         for i in range(self.repNumb):
             for j in range(i+1):
@@ -41,6 +55,9 @@ class Representation(ABC):
         return h
     
     def findTwoElecInts(self):
+        """
+        Function that finds 2 electron integrals.
+        """
         twoElecInts = np.empty([self.repNumb,self.repNumb,self.repNumb,self.repNumb])
         for i in range(self.repNumb):
             for k in range(i+1):
@@ -54,17 +71,30 @@ class Representation(ABC):
         return twoElecInts
     
     def normalise(self,C):
+        """
+        Function that normalises numpy array C.
+        """
         return C/(np.einsum("ij,i,j",self.S,C,C)**0.5)
     
     def normaliseList(self,lst):
+        """
+        Function that normalises a list of numpy arrays.
+        """
         return [self.normalise(C) for C in lst]
     
     def normaliseDicList(self,lst):
+        """
+        Function that normalises a list of dictionaries in the form 
+        defined in hartree_fock.py.
+        """
         for i,D in enumerate(lst):
             lst[i]["state"] = self.normalise(D["state"])
         return lst
     
     def F(self,states1,states2):
+        """
+        Function that finds F^(+/-) matrix given C^(+/-) and C^(-/+) matricies.
+        """
         sum1 = sum([np.einsum("prqs,r,s",self.twoElecInts, C, C) for C in states1])
         sum2 = sum([np.einsum("prsq,r,s",self.twoElecInts, C, C) for C in states1])
         sum3 = sum([np.einsum("prqs,r,s",self.twoElecInts, C, C) for C in states2])
@@ -72,28 +102,47 @@ class Representation(ABC):
     
     
     def findE(self,states):
+        """
+        Function that finds E given a list of dictionaries in the form 
+        defined in hartree_fock.py
+        """
         return sum([S["e"] + np.einsum("ij,i,j",self.h,S["state"],S["state"]) for S in states])/2 #use S or C consistently
 
 
     @abstractmethod
-    def overLapInt(self,p,q): #p and q are ints and specify the basis abstractly
+    def overLapInt(self,p,q):
+        """
+        Abstract function that finds the overlap integral elements.
+        """
         pass
 
     @abstractmethod
     def kineticInt(self,p,q):
+        """
+        Abstract function that finds the kinetic integral elements.
+        """
         pass
 
     @abstractmethod
     def nucInt(self,p,q,R_c,Z):
+        """
+        Abstract function that finds the nuclear integral elements.
+        """
         pass
 
     @abstractmethod
     def twoElecInt(self,p,r,q,s):
+        """
+        Abstract function that finds the two electron integral elements.
+        """
         pass
 
 
 
 class Rep1sGTO(Representation):
+    """
+    Representation class for the symmetric GTO basis. 
+    """
     def __init__(self,Zs,alphas,nuclearPositions,basisVecs):
         self.alphas = alphas
         self.basisVecs = basisVecs
@@ -114,10 +163,13 @@ class Rep1sGTO(Representation):
 
 
 class RepGTO(Representation):
+    """
+    Representation class for the general GTO basis. 
+    """
     def __init__(self,Zs,alphas,nuclearPositions,basisVecs,type):
         self.alphas = alphas
-        self.basisVecs = basisVecs #all R's need to be arrays
-        self.type = type #[[i,j,k],...] points in direction that the integral is performed, 0 if s
+        self.basisVecs = basisVecs 
+        self.type = type 
         Representation.__init__(self,Zs,nuclearPositions,len(alphas))
 
     def overLapInt(self,a,b):  
@@ -132,6 +184,7 @@ class RepGTO(Representation):
         return -Z*nuclear_attraction(self.alphas[a],self.type[a],self.basisVecs[a],
                                      self.alphas[b],self.type[b],self.basisVecs[b],R_C)
     def twoElecInt(self,a,b,c,d):
+        #order of c and b's here is due to notational differences
         return electron_repulsion(self.alphas[a],self.type[a],self.basisVecs[a],
                                   self.alphas[c],self.type[c],self.basisVecs[c],
                                   self.alphas[b],self.type[b],self.basisVecs[b],
