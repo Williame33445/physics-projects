@@ -12,13 +12,13 @@ The full Hamiltonian of a molecular system is given by $(1)$.
 
 One of the main problems in molecular physics is to find the eigenstates of $(1)$. It turns out that in most cases analytical solutions are not possible, meaning numerical methods need to be applied.
 
-The Hartree-Fock method is a possible numerical method. It uses the Born-Oppenheimer approximation to decouple the electron and nuclei parts (Griffiths, 2018, p. 428),  guesses that the eigenstate is a Slater determinant (Thijssen, 2013, p. 53) and applies variational methods to find an upper bound of the eigenstates. This process reduces the eigen-equation to $N$ equations in the form of $(2)$.
+The Hartree-Fock method is a possible numerical method. It uses the Born-Oppenheimer approximation to decouple the electron and nuclei parts (Griffiths, 2018, p. 428),  guesses that the eigenstate is a Slater determinant (Thijssen, 2013, p. 53) and applies variational methods to find an upper bound of the eigenstates. This process reduces $(1)$ to $N$ equations in the form:
 
 $$\hat{F}\psi_k(\vec{r},m_s) = \epsilon_k\psi_k(\vec{r},m_s)\tag{2}$$
 
-Where $\psi_k(\vec{r},m_s)$ is a component of the Slater determinant, $\hat{F}$ is called the Fock operator (derived in  (Thijssen, 2013, p. 56)) and $\epsilon_k$ is related to the energy of the total eigenstate.
+where $\psi_k(\vec{r},m_s)$ is a component of the Slater determinant, $\hat{F}$ is called the Fock operator (derived in  (Thijssen, 2013, p. 56)) and $\epsilon_k$ is related to the energy of the total eigenstate.
 
-$\hat{F}$ contains $\psi_k(\vec{r},m_s)$ s in its definition, meaning $(2)$ forms a self-consistency equation. This meaning $(2)$ does not take the form of an eigen-equation, making it much harder to solve.
+$\hat{F}$ contains $\psi_k(\vec{r},m_s)$ s in its definition, meaning $(2)$ forms a self-consistency equation. This means $(2)$ does not take the form of an eigen-equation, making it much harder to solve.
 
 
 To solve (2), the variational method is applied again. An upper bound of the total electron energy can then be deduced from $(3)$.
@@ -29,7 +29,7 @@ This entire process is the Hatree-Fock method.
 
 ### Variational method for the Fock Equation
 
-The second application of the variational method guesses the general form of $\psi_k(\vec{r},m_s)$. For atomic systems, the most natural guess is a linear combination of Slater-type orbitals (STO). These take the form of $(4)$ (Slater, 1930, p.57).
+For second application of the variational method, the general form of $\psi_k(\vec{r},m_s)$ guessed. For atomic systems, the most natural guess is a linear combination of Slater-type orbitals (STO). These take the form of $(4)$ (Slater, 1930, p.57).
 
 $$
 \psi_k(\vec{r},m_s) = \sum\limits_n A_n     r^{n-1}e^{-a_nr}Y_{lm}(\theta,\phi)\chi_{m_s}\tag{4}
@@ -47,24 +47,31 @@ Again, the coefficients $a_{ijk},A_{ijk}$ are then varied to find the stationary
 
 Whatever basis is chosen, the result is transforming the problem into a non-linear variational problem. While this can be solved directly, if the $\alpha_{ijk}$ s are deduced by some other method, the problem becomes solvable by (easier) linear methods. This is typically done by either fitting a set of GTO's to an appropriate STO or solving a simpler but appropriate non-linear problem (Thijssen, 2013, p. 67). This project doesn't cover these methods, it only considers the linear method. The $\alpha_{ijk}$ coefficients used are taken from (Thijssen, 2013, p. 35, p. 50) and (MolSSI, 2020).
 
-Given the $\alpha_{ijk}$ s, the variational problems can then be written in matrix form as $(5)$.
+Given the $\alpha_{ijk}$ s, the variational problems can then be written in matrix form as:
 
 $$F^+C_k^+ = \epsilon_k^+SC_k^+,F^-C_k^- = \epsilon_k^-SC_k^-\tag{5}$$
 
-Where $F_{nm}^{\pm}$ are the matrix elements for the plus/minus parts of the GTO, $S$ is the GTO overlap matrix and $C_k^{\pm}$ is the representation of $\psi_k(\vec{r},\pm\frac{\hbar}{2})$ in the GTO basis (Thijssen, 2013, p. 64).
+where $F_{nm}^{\pm}$ are the matrix elements for the plus/minus parts of the GTO, $S$ is the GTO overlap matrix and $C_k^{\pm}$ is the representation of $\psi_k(\vec{r},\pm\frac{\hbar}{2})$ in the GTO basis (Thijssen, 2013, p. 64).
 
 This equation can then be solved iteratively. $F$ is deduced for an initial guess of the $\psi_k(\vec{r},m_s)$ 's and the generalised eigenvalue problem is solved. This process is then repeated, using the $\psi_k(\vec{r},m_s)$ 's found as the initial guess, until the solution converges. These solutions can then be used to deduce an upper bound of the eigenstate.
 
 ## Implementation
 
-As any basis can be chosen for variational solutions to $(4)$, the matrix elements required to form equation $(5)$ are described in an abstract class called Representation. A subclass Representaion then corresponds to a certain basis. Two subclasses are defined: Rep1sGTO only uses the spherically symmetric Gaussian basis and RepGTO considers the general Gaussian basis. In principle, other bases could be added (eg. STO), however this is not implemented here. The matrix elements required for Rep1sGTO are defined in GTO1s_matrix_elements.py; for a derivation of these elements, see (Thijssen, 2013, p. 64). The matrix elements required for RepGTO are found with code taken from (Goings, 2017). These matrix elements are defined in MolecularIntegrals.py.
+As any basis can be chosen for variational solutions to $(4)$, the matrix elements required to form equation $(5)$ are described in an abstract class called Representation. A subclass Representation then corresponds to a certain basis. Two subclasses are defined: Rep1sGTO only uses the 1s Gaussian basis and RepGTO considers the general Gaussian basis. In principle, other bases could be added (eg. STO), however this is not implemented here. The matrix elements required for Rep1sGTO are defined in GTO1s_matrix_elements.py; for a derivation of these elements, see (Thijssen, 2013, p. 64). The matrix elements required for RepGTO are found with code taken from (Goings, 2017). These matrix elements are defined in MolecularIntegrals.py.
 
 In terms of the actual algorithm, this is implemented in Hartee_Fock.py as a recursive function called iterateHF. The eigenstate that is being calculated is determined by the getTargetEigStates function that is a parameter of iterateHF.
 
-Some simple examples of the simulation are given in hartree-fock-calculations.ipynb.
-
 ## Results
 
+Some simple examples of the simulation are given in hartree-fock-calculations.ipynb. Some of the ground energies found are given in the table below.
+
+|  Atom/Molecule   | HTF Energy (hartree) |Experimental Energy (hartree)|
+| -------- | ------- | -----|
+| $He$  | -2.855    | -2.862 |
+| $Li$ | -7.410 | -7.479
+| $O$    | -74.582    | -75.113
+
+Molecular parameters (like bond length) can also be deduced by finding the parameter than minimises the total energy (this is allowed as at this level of approximation molecular energy states seem continuous). In hartree-fock-calculations.ipynb, $H_2$ and $H_2O$ are considered. For $H_2$, the bond length found was $1.388$ au. The experimental result is 1.401 au. For $H_2O$, the bond length found was 1.817 au and the angle between bonds found was 107.227 degrees. The experimental values are 1.809 au and 104.5 degrees.
 ## References
 
 Thijseen J., 2013. Computational Physics. Cambridge: Cambridge University Press
