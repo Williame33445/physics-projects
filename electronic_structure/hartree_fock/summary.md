@@ -29,7 +29,7 @@ This entire process is the Hatree-Fock method.
 
 ### Variational method for the Fock Equation
 
-For second application of the variational method, the general form of $\psi_k(\vec{r},m_s)$ guessed. For atomic systems, the most natural guess is a linear combination of Slater-type orbitals (STO). These take the form of $(4)$ (Slater, 1930, p.57).
+For the second application of the variational method, the general form of $\psi_k(\vec{r},m_s)$ guessed. For atomic systems, the most natural guess is a linear combination of Slater-type orbitals (STO). These take the form of $(4)$ (Slater, 1930, p.57).
 
 $$
 \psi_k(\vec{r},m_s) = \sum\limits_n A_n     r^{n-1}e^{-a_nr}Y_{lm}(\theta,\phi)\chi_{m_s}\tag{4}
@@ -53,7 +53,7 @@ $$F^+C_k^+ = \epsilon_k^+SC_k^+,F^-C_k^- = \epsilon_k^-SC_k^-\tag{5}$$
 
 where $F_{nm}^{\pm}$ are the matrix elements for the plus/minus parts of the GTO, $S$ is the GTO overlap matrix and $C_k^{\pm}$ is the representation of $\psi_k(\vec{r},\pm\frac{\hbar}{2})$ in the GTO basis (Thijssen, 2013, p. 64).
 
-This equation can then be solved iteratively. $F$ is deduced for an initial guess of the $\psi_k(\vec{r},m_s)$ 's and the generalised eigenvalue problem is solved. This process is then repeated, using the $\psi_k(\vec{r},m_s)$ 's found as the initial guess, until the solution converges. These solutions can then be used to deduce an upper bound of the eigenstate.
+This equation can then be solved iteratively. $F$ is deduced for an initial guess of the $\psi_k(\vec{r},m_s)$ s and the generalised eigenvalue problem is solved. This process is then repeated, using the $\psi_k(\vec{r},m_s)$ 's found as the initial guess, until the solution converges. These solutions can then be used to deduce an upper bound of the eigenstate.
 
 ## Implementation
 
@@ -63,7 +63,7 @@ In terms of the actual algorithm, this is implemented in Hartee_Fock.py as a rec
 
 ## Results
 
-Some simple examples of the simulation are given in hartree-fock-calculations.ipynb. Some of the ground energies found are given in the table below.
+Some simple examples of the simulation are given in hartree-fock-calculations.ipynb. Some of the ground state energies found are given in the table below.
 
 |  Atom/Molecule   | HTF Energy (hartree) |Experimental Energy (hartree)|
 | -------- | ------- | -----|
