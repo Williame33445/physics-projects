@@ -61,7 +61,7 @@ This project was implemented as a class called ScatteringSystem in spherically_s
 
 In hydrogen-scattering-by-krypton-atoms.py the project is used to deduce the total cross-section at different energies for scattering of hydrogen with krypton atoms. The distribution found is:
 
-![alt text](https://raw.githubusercontent.com/Williame33445/physics-projects/main/quantum-scattering/total-cross-section-vs-energy-for-H-Kr-scattering.png)
+![alt text](https://raw.githubusercontent.com/Williame33445/physics-projects/4e3a5bf02762dc87fead9f02e365aaf88f6c8c14/quantum-scattering/total-cross-section-vs-energy-for-H-Kr-scattering.png)
 
 This corresponds to experimental results.
 
