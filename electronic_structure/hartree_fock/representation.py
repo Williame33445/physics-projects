@@ -33,7 +33,7 @@ class Representation(ABC):
 
     def findS(self):
         """
-        Function that finds S matrix
+        Method that finds S matrix
         """
         S = np.empty([self.repNumb,self.repNumb])
         for i in range(self.repNumb):
@@ -45,7 +45,7 @@ class Representation(ABC):
     
     def findh(self):
         """
-        Function that finds h matrix.
+        Method that finds h matrix.
         """
         h = np.empty([self.repNumb,self.repNumb])
         for i in range(self.repNumb):
@@ -59,7 +59,7 @@ class Representation(ABC):
     
     def findTwoElecInts(self):
         """
-        Function that finds 2 electron integrals.
+        Method that finds 2 electron integrals.
         """
         twoElecInts = np.empty([self.repNumb,self.repNumb,self.repNumb,self.repNumb])
         for i in range(self.repNumb):
@@ -75,19 +75,19 @@ class Representation(ABC):
     
     def normalise(self,C):
         """
-        Function that normalises numpy array C.
+        Method that normalises numpy array C.
         """
         return C/(np.einsum("ij,i,j",self.S,C,C)**0.5)
     
     def normaliseList(self,lst):
         """
-        Function that normalises a list of numpy arrays.
+        Method that normalises a list of numpy arrays.
         """
         return [self.normalise(C) for C in lst]
     
     def normaliseDicList(self,lst):
         """
-        Function that normalises a list of dictionaries in the form 
+        Method that normalises a list of dictionaries in the form 
         defined in hartree_fock.py.
         """
         for i,D in enumerate(lst):
@@ -96,7 +96,7 @@ class Representation(ABC):
     
     def F(self,states1,states2):
         """
-        Function that finds F^(+/-) matrix given C^(+/-) and C^(-/+) matricies.
+        Method that finds F^(+/-) matrix given C^(+/-) and C^(-/+) matricies.
         """
         sum1 = sum([np.einsum("prqs,r,s",self.twoElecInts, C, C) for C in states1])
         sum2 = sum([np.einsum("prsq,r,s",self.twoElecInts, C, C) for C in states1])
@@ -106,7 +106,7 @@ class Representation(ABC):
     
     def findE(self,states):
         """
-        Function that finds E given a list of dictionaries in the form 
+        Method that finds E given a list of dictionaries in the form 
         defined in hartree_fock.py
         """
         return sum([S["e"] + np.einsum("ij,i,j",self.h,S["state"],S["state"]) for S in states])/2 #use S or C consistently
@@ -115,28 +115,28 @@ class Representation(ABC):
     @abstractmethod
     def overLapInt(self,p,q):
         """
-        Abstract function that finds the overlap integral elements.
+        Abstract method that finds the overlap integral elements.
         """
         pass
 
     @abstractmethod
     def kineticInt(self,p,q):
         """
-        Abstract function that finds the kinetic integral elements.
+        Abstract method that finds the kinetic integral elements.
         """
         pass
 
     @abstractmethod
     def nucInt(self,p,q,R_c,Z):
         """
-        Abstract function that finds the nuclear integral elements.
+        Abstract method that finds the nuclear integral elements.
         """
         pass
 
     @abstractmethod
     def twoElecInt(self,p,r,q,s):
         """
-        Abstract function that finds the two electron integral elements.
+        Abstract method that finds the two electron integral elements.
         """
         pass
 
