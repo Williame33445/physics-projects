@@ -8,7 +8,7 @@ This project uses the Hartree-Fock method to describe simple atoms and molecules
 
 The full Hamiltonian of a molecular system is given by $(1)$.
 
-![alt text](https://raw.githubusercontent.com/Williame33445/physics-projects/main/electronic_structure/hartree_fock/electronic-hamiltonian.png)
+![alt text](https://raw.githubusercontent.com/Williame33445/physics-projects/4e3a5bf02762dc87fead9f02e365aaf88f6c8c14/electronic_structure/hartree_fock/electronic-hamiltonian.png)
 
 One of the main problems in molecular physics is to find the eigenstates of $(1)$. It turns out that in most cases analytical solutions are not possible, meaning numerical methods need to be applied.
 
