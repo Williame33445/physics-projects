@@ -1,6 +1,8 @@
 # method solves d^2X(t)/dx^2 = f(t)X(t) for boundary conditions X(t_1) = X_1, X(t_2) = X_2
 # to h^6
 
+import numpy as np
+
 def w(x,t,h,f):
     return (1 - f(t)*(h**2)/12)*x
 
@@ -22,4 +24,4 @@ def runNumerov(t_0,h,x_0,x_1,f,N):
         t = tList[-1]
         xList.append(iterateNumerov(x_i,x_iMinus1,t,h,f))
         tList.append(t+h)
-    return tList, xList
+    return np.array(tList), np.array(xList)
