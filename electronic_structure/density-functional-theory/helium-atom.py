@@ -42,7 +42,8 @@ def getVHFunc(rs,us):
         Us[i] = iterateVerlet(Us[i-1],Us[i-2],0.01,Rs[i-1],lambda U,r: -(uFunc(r)**2)/r)
         Rs[i] = Rs[i-1] + 0.01
 
-    #there seems to be a negative problem here
+    if np.any(Us<0):
+        return lambda r: 0
 
     Us =  Us/Us[-1] #negative solutions here, problem?
     Vs = np.array(list(map(lambda r,U: U/r if r != 0 else 0,Rs,Us)))
@@ -79,3 +80,5 @@ def findEigenstate(rs,us,EPrev):
 rs,us = runNumerov(r0,h,u0,u1,fKS(-1,lambda r: 1),N-2)
 
 print(findEigenstate(rs,us/np.sqrt(np.sum(abs(h)*us**2)),-2.5))
+
+#should look at the hydrogen case and remove the negatives, my trick with 10**10 was ad hoc
