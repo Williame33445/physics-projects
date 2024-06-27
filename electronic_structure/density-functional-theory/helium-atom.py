@@ -1,14 +1,13 @@
-import sys
-import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-sys.path.append(os.path.abspath("."))
-from useful_code.numerov_method import *
-from useful_code.verlet_method import *
+#this program implements Thijssen's density function approach to the helium atom, it is currently broken
 
 secMin = 0.0001 
 def iterateSecant(x_0,x_1,f):
+    """
+    Applies secant method.
+    """
     x_2 = (x_1*f(x_0) -x_0*f(x_1))/(f(x_0) - f(x_1))
     if abs(f(x_2)) < secMin:
         return x_2
@@ -17,10 +16,13 @@ def iterateSecant(x_0,x_1,f):
     else:
         return iterateSecant(x_2,x_1,f)
 
-def getf(Vs): 
+def getf(Vs):
+    """
+    Finds us0 for sim.
+    """
     def f(E):
         rs0,us0 = run(E,Vs)
-        return us0[-1] # negative solutions problem?
+        return us0[-1]
     return f
 
 
@@ -41,6 +43,9 @@ r1 = r0 + h
 u1 = uAsym(r1)
 
 def getVs(rs,us):
+    """
+    Finds Vs matrix
+    """
     us = np.flip(us)
     Us = np.empty(N)
     Rs = np.empty(N)
@@ -53,11 +58,16 @@ def getVs(rs,us):
         Us[i] = 2*Us[i-1] - Us[i-2] - ((us[i-1]**2)/Rs[i-1])*(0.01**2)
         Rs[i] = Rs[i-1] + 0.01
 
+    #negative solution problem occurs here
+
     Vs = np.array(list(map(lambda r,U: U/r if r != 0 else 0,Rs,Us))) #np way of doing this?
 
     return np.flip(Vs)
 
 def run(E,Vs):
+    """
+    Solves for a given Vs
+    """
     us = np.empty(N)
     rs = np.empty(N)
     us[0] = u0
@@ -74,12 +84,14 @@ def run(E,Vs):
 
 
 def findEigenstate(rs,us,EPrev):
-    print(EPrev)
+    """
+    Recursive function that tries to deduce ground state.
+    """
     Vs = getVs(rs,us)
     
-    epsilon = iterateSecant(-2,-1,getf(Vs)) #can I write this in a neater way, make range guessed variables
+    epsilon = iterateSecant(-2,-1,getf(Vs))
 
-    rsNew,usNew = run(epsilon,Vs) # should move to specifying with index?
+    rsNew,usNew = run(epsilon,Vs)
     VsNew = getVs(rsNew,usNew)
     ENew = 2*epsilon - np.sum(abs(h)*VsNew*(usNew**2))
 
@@ -90,7 +102,6 @@ def findEigenstate(rs,us,EPrev):
 
 
 rs,us = run(-2,np.zeros(N))
-
 print(findEigenstate(rs,us,-2))
 
 
