@@ -1,7 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-#this program implements Thijssen's density function approach to the helium atom
+"""
+This program implements Thijssen's density function approach to the helium atom. This method is not 
+particularly accurate. I have used integration methods for V_H instead of poisson equation methods.
+"""
 
 secMin = 0.0001 
 def iterateSecant(x_0,x_1,f):
@@ -16,47 +19,51 @@ def iterateSecant(x_0,x_1,f):
     else:
         return iterateSecant(x_2,x_1,f)
 
-def getf(Vs):
+def findus0Func(Vs,V_x):
     """
     Finds us0 for sim.
     """
     def f(E):
-        rs0,us0 = run(E,Vs)
+        rs0,us0 = run(E,Vs,V_x) #change names
         return us0[-1]
     return f
 
 
-
-def uAsym(r):
-    """
-    Finds asymptotic solution
-    """
-    return r*np.exp(-r)
-
 h = -0.01 
 N = 1000
 acc = 0.001
+lowerEpsilon = -2
+upperEpsilon = -1
 
+uAsym = lambda r: np.sqrt(32)*r*np.exp(-2*r)
 r0 = 10 + h
 u0 = uAsym(r0)
 r1 = r0 + h
 u1 = uAsym(r1)
 
-def getVs(rs,us):
+def getV_H(rs,us):
     """
-    Finds Vs matrix
+    Finds V_H, uses integration methods.
     """
-    Vs = np.empty(N)
-    Vs[0] = np.sum((us**2)/rs)
+    V_H = np.empty(N)
+    V_H[-1] = np.sum((us**2)/rs)
 
-    for i in range(1,N):
-        Vs[i] = abs(h)*(np.sum((us[:i]**2)/rs[:i]) + np.sum(us[i:]**2)/rs[i])
+    for i in range(N-1):
+        V_H[i] = abs(h)*(np.sum((us[:i]**2)/rs[:i]) + np.sum(us[i:]**2)/rs[i])
 
-    return Vs 
+    return 2*V_H  
 
-def run(E,Vs):
+def getV_x(rs,us):
     """
-    Solves for a given Vs
+    Finds local density exchange potential.
+    
+    """
+    return -(3*(us**2)/(2*(np.pi*rs)**2))**(1/3)
+
+
+def run(epsilon,V_H,V_x):
+    """
+    Solves for a given V_H
     """
     us = np.empty(N)
     rs = np.empty(N)
@@ -65,9 +72,11 @@ def run(E,Vs):
     us[1] = u1
     rs[1] = r1
 
+    #this is the verlet method
     for i in range(2,N):
-        us[i] = 2*us[i-1] - us[i-2] - 2*(E + 2/rs[i-1] - Vs[i-1])*us[i-1]*(h**2)
+        us[i] = 2*us[i-1] - us[i-2] - 2*(epsilon + 2/rs[i-1] - V_H[i-1] - V_x[i-1])*us[i-1]*(h**2)
         rs[i] = rs[i-1] + h
+    
     usNorm = us/np.sqrt(np.sum(abs(h)*us**2))
     return rs, usNorm
 
@@ -77,22 +86,21 @@ def findEigenstate(rs,us,EPrev):
     """
     Recursive function that tries to deduce ground state.
     """
-    print(EPrev)
-    Vs = getVs(rs,us)
-    
-    epsilon = iterateSecant(-2,-1,getf(Vs))
+    V_H = getV_H(rs,us)
+    V_x = getV_x(rs,us)
+    epsilon = iterateSecant(lowerEpsilon,upperEpsilon,findus0Func(V_H,V_x))
 
-    rsNew,usNew = run(epsilon,Vs)
-    VsNew = getVs(rsNew,usNew)
-    ENew = 2*epsilon - np.sum(abs(h)*VsNew*(usNew**2))
-
+    rsNew,usNew = run(epsilon,V_H,V_x)
+    V_HNew = getV_H(rsNew,usNew) 
+    V_xNew = getV_x(rsNew,usNew)
+    ENew = 2*epsilon - np.sum(abs(h)*V_HNew*(usNew**2)) + 0.5*np.sum(abs(h)*V_xNew*(usNew**2))
 
     if abs(ENew - EPrev) < acc:
         return ENew
     return findEigenstate(rsNew,usNew,ENew)
 
 
-rs,us = run(-2,np.zeros(N))
+rs,us = run(-2,np.zeros(N),np.zeros(N))
 print(findEigenstate(rs,us,-2))
 
 
