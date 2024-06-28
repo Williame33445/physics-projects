@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-#this program implements Thijssen's density function approach to the helium atom, it is currently broken
+#this program implements Thijssen's density function approach to the helium atom
 
 secMin = 0.0001 
 def iterateSecant(x_0,x_1,f):
@@ -34,10 +34,10 @@ def uAsym(r):
     return r*np.exp(-r)
 
 h = -0.01 
-N = 500
+N = 1000
 acc = 0.001
 
-r0 = 5 + h
+r0 = 10 + h
 u0 = uAsym(r0)
 r1 = r0 + h
 u1 = uAsym(r1)
@@ -46,23 +46,13 @@ def getVs(rs,us):
     """
     Finds Vs matrix
     """
-    us = np.flip(us)
-    Us = np.empty(N)
-    Rs = np.empty(N)
-    Us[0] = 0
-    Rs[0] = 0
-    Us[1] = 0.01
-    Rs[1] = 0.01
+    Vs = np.empty(N)
+    Vs[0] = np.sum((us**2)/rs)
 
-    for i in range(2,N):
-        Us[i] = 2*Us[i-1] - Us[i-2] - ((us[i-1]**2)/Rs[i-1])*(0.01**2)
-        Rs[i] = Rs[i-1] + 0.01
+    for i in range(1,N):
+        Vs[i] = abs(h)*(np.sum((us[:i]**2)/rs[:i]) + np.sum(us[i:]**2)/rs[i])
 
-    #negative solution problem occurs here
-
-    Vs = np.array(list(map(lambda r,U: U/r if r != 0 else 0,Rs,Us))) #np way of doing this?
-
-    return np.flip(Vs)
+    return Vs 
 
 def run(E,Vs):
     """
@@ -87,6 +77,7 @@ def findEigenstate(rs,us,EPrev):
     """
     Recursive function that tries to deduce ground state.
     """
+    print(EPrev)
     Vs = getVs(rs,us)
     
     epsilon = iterateSecant(-2,-1,getf(Vs))
