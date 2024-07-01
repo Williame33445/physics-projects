@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 """
 This program implements Thijssen's density function approach to the helium atom. This method is not 
