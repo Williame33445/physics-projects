@@ -16,3 +16,8 @@ For ase part:
 Other stuff:
 - graphine, nanotubes calculations
 - look at the effect of defects (https://arxiv.org/pdf/1812.06201)
+
+Things to do on Hartree Fock:
+- visualisation (density plots)
+- calculating dipole moments
+- deducing suitable guassian coefficients
