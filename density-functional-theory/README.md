@@ -22,3 +22,5 @@ Things to do on Hartree Fock:
 - visualisation (density plots)
 - calculating dipole moments
 - deducing suitable guassian coefficients
+- why it fails 
+- more molecular calculations (see atomic physics course)
