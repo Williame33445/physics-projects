@@ -24,3 +24,5 @@ Things to do on Hartree Fock:
 - deducing suitable guassian coefficients
 - why it fails 
 - more molecular calculations (see atomic physics course)
+
+- Lorenz equation notebook needs to be finished
