@@ -3,7 +3,6 @@
 This repository is for my personal projects. 
 
 Things to do:
-- finish Lorenz equation notebook (linear interpolation for $\lambda$ coefficient)
 - copper ase calculations (https://kitchingroup.cheme.cmu.edu/dft-book/dft.html#orgheadline13)
 - LAPW copper calcuation is broken
 - some more density functional problems
