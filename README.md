@@ -11,4 +11,4 @@ Things to do:
 - deducing suitable guassian coefficients for Guassian basis
 - Quantum computer simulations 
 - https://www.physics.rutgers.edu/grad/509/ has some interesting topics
-
+- Grover algorithm visualisation
