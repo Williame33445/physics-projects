@@ -12,4 +12,7 @@ Things to do:
 - Quantum computer simulations 
 - https://www.physics.rutgers.edu/grad/509/ has some interesting topics
 - Grover algorithm visualisation
+- latex on markdown with \tag seems to be broken
+- KKR method for copper (see ON THE CALCULATION OF THE ENERGY OF A BLOCH WAVE IN A METAL by J. KORRINGA) 
+
 - finish Shor algorithm notes
