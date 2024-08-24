@@ -1,3 +1,1 @@
-# Barnes hut 
-
-This is a modified version of part of the code from my Barnes Hut project.
+This part of the repository contains a simple simulation of spiral galaxy evolution and some mp4s of the same simulation from my Barnes Hut project (https://github.com/Williame33445/barnes-hut-simulation).
