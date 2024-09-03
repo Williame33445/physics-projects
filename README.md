@@ -3,14 +3,17 @@
 This repository is for my personal projects. 
 
 Things to do:
-- copper ase calculations (https://kitchingroup.cheme.cmu.edu/dft-book/dft.html#orgheadline13)
 - LAPW copper calcuation is broken
 - some more density functional problems
 - look at the effect of defects (https://arxiv.org/pdf/1812.06201)
 - hartree-fock visualisation by density plots + more applications (calculation dipole moments + limits to method)
-- deducing suitable guassian coefficients for Guassian basis
 - https://www.physics.rutgers.edu/grad/509/ has some interesting topics
 - Grover algorithm visualisation
 - latex on markdown with \tag seems to be broken
 - KKR method for copper (see ON THE CALCULATION OF THE ENERGY OF A BLOCH WAVE IN A METAL by J. KORRINGA)
 - classical scattering 
+- change Hartree Fock program to use contracted basis elements, use BSE properly
+- look at Kopmann theorm for Helium, should be able to get hydrogen specra as well
+- look at Generalized X-Ray Scattering Factors ROBERT F. STEWART
+- using Hartree-Fock approximation to calculate cross-sections due to molecules (Born approx)
+ 
