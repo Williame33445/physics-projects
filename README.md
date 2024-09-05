@@ -12,7 +12,7 @@ Things to do:
 - latex on markdown with \tag seems to be broken
 - KKR method for copper (see ON THE CALCULATION OF THE ENERGY OF A BLOCH WAVE IN A METAL by J. KORRINGA)
 - classical scattering 
-- change Hartree Fock program to use contracted basis elements, use BSE properly
+- change Hartree Fock program to use contracted basis elements
 - look at Kopmann theorm for Helium, should be able to get hydrogen specra as well
 - look at Generalized X-Ray Scattering Factors ROBERT F. STEWART
 - using Hartree-Fock approximation to calculate cross-sections due to molecules (Born approx)
