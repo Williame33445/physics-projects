@@ -141,49 +141,83 @@ class Rep1sGTO(Representation):
     """
     Representation class for the symmetric GTO basis. 
     """
-    def __init__(self,Zs,alphas,nuclearPositions,basisVecs):
-        self.alphas = alphas
-        self.basisVecs = basisVecs
-        Representation.__init__(self,Zs,nuclearPositions,len(alphas))
+    def __init__(self,GTOs,Zs,nuclearPositions):
+        self.GTOs = GTOs
+        Representation.__init__(self,Zs,nuclearPositions,len(GTOs))
         
     def overLapInt(self,a,b):
-        return overlap1s(self.basisVecs[a],self.alphas[a],self.basisVecs[b],self.alphas[b])
+        A = self.GTOs[a]
+        B = self.GTOs[b]
+        return overlap1s(A.alpha,A.type,A.center,B.alpha,B.type,B.center)
 
     def kineticInt(self,a,b):
-        return kineticInt1s(self.basisVecs[a],self.alphas[a],self.alphas[b],self.alphas[b])
+        A = self.GTOs[a]
+        B = self.GTOs[b]
+        return kineticInt1s(A.alpha,A.type,A.center,B.alpha,B.type,B.center)
     
     def nucInt(self,a,b,R_C,Z):
-        return nucInt1s(self.basisVecs[a],self.alphas[a],self.alphas[b],self.alphas[b],R_C,Z)
+        A = self.GTOs[a]
+        B = self.GTOs[b]
+        return nucInt1s(A.alpha,A.type,A.center,B.alpha,B.type,B.center,R_C,Z)
 
     def twoElecInt(self,a,b,c,d):
-        return twoElecInt2s(self.basisVecs[a],self.alphas[a],self.alphas[b],self.alphas[b],
-                            self.basisVecs[c],self.alphas[c],self.alphas[d],self.alphas[d])
+        A = self.GTOs[a]
+        B = self.GTOs[b]
+        C = self.GTOs[c]
+        D = self.GTOs[d]
+        return twoElecInt1s(A.alpha,A.type,A.center,B.alpha,B.type,B.center,
+                                  C.alpha,C.type,C.center,D.alpha,D.type,D.center)
 
 
 class RepGTO(Representation):
     """
     Representation class for the general GTO basis. 
     """
-    def __init__(self,Zs,alphas,nuclearPositions,basisVecs,type):
-        self.alphas = alphas
-        self.basisVecs = basisVecs 
-        self.type = type 
-        Representation.__init__(self,Zs,nuclearPositions,len(alphas))
+    def __init__(self,GTOs,Zs,nuclearPositions):
+        self.GTOs = GTOs
+        Representation.__init__(self,Zs,nuclearPositions,len(GTOs))
 
-    def overLapInt(self,a,b):  
-        return overlap(self.alphas[a],self.type[a],self.basisVecs[a],
-                       self.alphas[b],self.type[b],self.basisVecs[b])
+    def overLapInt(self,a,b):
+        A = self.GTOs[a]
+        B = self.GTOs[b]
+        return overlap(A.alpha,A.type,A.center,B.alpha,B.type,B.center)
     
     def kineticInt(self,a,b):
-        return kinetic(self.alphas[a],self.type[a],self.basisVecs[a],
-                       self.alphas[b],self.type[b],self.basisVecs[b])
+        A = self.GTOs[a]
+        B = self.GTOs[b]
+        return kinetic(A.alpha,A.type,A.center,B.alpha,B.type,B.center)
     
     def nucInt(self,a,b,R_C,Z):
-        return -Z*nuclear_attraction(self.alphas[a],self.type[a],self.basisVecs[a],
-                                     self.alphas[b],self.type[b],self.basisVecs[b],R_C)
+        A = self.GTOs[a]
+        B = self.GTOs[b]
+        return -Z*nuclear_attraction(A.alpha,A.type,A.center,B.alpha,B.type,B.center,R_C)
+    
     def twoElecInt(self,a,b,c,d):
+        A = self.GTOs[a]
+        B = self.GTOs[b]
+        C = self.GTOs[c]
+        D = self.GTOs[d]
         #order of c and b's here is due to notational differences
-        return electron_repulsion(self.alphas[a],self.type[a],self.basisVecs[a],
-                                  self.alphas[c],self.type[c],self.basisVecs[c],
-                                  self.alphas[b],self.type[b],self.basisVecs[b],
-                                  self.alphas[d],self.type[d],self.basisVecs[d])
+        return electron_repulsion(A.alpha,A.type,A.center,C.alpha,C.type,C.center,
+                                  B.alpha,B.type,B.center,D.alpha,D.type,D.center)
+
+
+class RepCGTO(Representation):
+    def __init__(self,GTOs,Zs,nuclearPositions):
+        self.GTOs = GTOs
+        Representation.__init__(self,Zs,nuclearPositions,len(GTOs))
+
+        #should use RepGTO to get H matrix and then perform inner products to get contraction
+
+    def overLapInt(self,a,b):  
+        pass
+    
+    def kineticInt(self,a,b):
+        pass
+    
+    def nucInt(self,a,b,R_C,Z):
+        pass
+
+    def twoElecInt(self,a,b,c,d):
+        pass
+

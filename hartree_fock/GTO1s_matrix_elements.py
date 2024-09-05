@@ -33,7 +33,7 @@ def nucInt1s(R_a,alpha_a,R_b,alpha_b,R_C,Z):
 
     return term1*term2*term3
 
-def twoElecInt2s(R_a,alpha_a,R_b,alpha_b,R_c,alpha_c,R_d,alpha_d):
+def twoElecInt1s(R_a,alpha_a,R_b,alpha_b,R_c,alpha_c,R_d,alpha_d):
     R_P = (alpha_a*R_a + alpha_c*R_c)/(alpha_a + alpha_c)
     R_Q = (alpha_b*R_b + alpha_d*R_d)/(alpha_b + alpha_d)
 
