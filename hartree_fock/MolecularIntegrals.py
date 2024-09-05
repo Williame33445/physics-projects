@@ -38,6 +38,9 @@ import numpy as np
 from scipy.special import factorial2 as fact2
 from scipy.special import hyp1f1
 
+def nuc(alpha_a,type_a,center_a,alpha_b,type_b,center_b,Rs,Zs):
+    return sum([-Zs[n]*nuclear_attraction(alpha_a,type_a,center_a,alpha_b,type_b,center_b,R) for n,R in enumerate(Rs)])
+
 
 def E(i,j,t,Qx,a,b):
     ''' Recursive definition of Hermite Gaussian coefficients.

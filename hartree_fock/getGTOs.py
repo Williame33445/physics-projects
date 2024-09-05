@@ -10,10 +10,10 @@ class GTOPrimative:
         self.type = type
 
 class GTOContraction:
-    def __init__(self,primatives,ds):
-        self.primatives = primatives 
-        self.ds = ds
-    
+    def __init__(self,primitives,ds):
+        self.primitives = primitives 
+        self.ds = np.array(ds)
+        
 def getType(l):
     if l == 0:
         return [np.array([0,0,0])]
@@ -45,7 +45,7 @@ def getGuassians(set,atom,center,basisType):
                             #print("Assumed Pople type conventions are followed")
                             ds.append(float(coefficients[0][i]))
             
-            if basisType == "primative":
+            if basisType == "primitive":
                 GTOs += contractedGTOs
             elif basisType == "contracted":
                 GTOs.append(GTOContraction(contractedGTOs,ds))

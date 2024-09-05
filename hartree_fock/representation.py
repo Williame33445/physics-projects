@@ -1,7 +1,6 @@
 from abc import abstractmethod, ABC
 import numpy as np 
 
-from GTO1s_matrix_elements import *
 from MolecularIntegrals import *
 
 
@@ -16,8 +15,8 @@ class Representation(ABC):
     """
 
     def __init__(self,Zs,nuclearPositions,repNumb):
-        self.Zs = Zs
-        self.nuclearPositions = nuclearPositions 
+        self.Zs = np.array(Zs)
+        self.nuclearPositions = np.array(nuclearPositions) 
         self.repNumb = repNumb
 
         #find base matricies and 2 electron integrals
@@ -45,11 +44,9 @@ class Representation(ABC):
         h = np.empty([self.repNumb,self.repNumb])
         for i in range(self.repNumb):
             for j in range(i+1):
-                kineticIntegral = self.kineticInt(i,j) 
-                nuclearIntegral = sum([self.nucInt(i,j,R,self.Zs[n]) for n,R in enumerate(self.nuclearPositions)])
-                integral = kineticIntegral + nuclearIntegral
-                h[i,j] = integral
-                h[j,i] = integral
+                integralij = self.kineticPlusNucInt(i,j)
+                h[i,j] = integralij
+                h[j,i] = integralij
         return h
     
     def findTwoElecInts(self):
@@ -115,16 +112,9 @@ class Representation(ABC):
         pass
 
     @abstractmethod
-    def kineticInt(self,p,q):
+    def kineticPlusNucInt(self,p,q):
         """
         Abstract method that finds the kinetic integral elements.
-        """
-        pass
-
-    @abstractmethod
-    def nucInt(self,p,q,R_c,Z):
-        """
-        Abstract method that finds the nuclear integral elements.
         """
         pass
 
@@ -134,39 +124,6 @@ class Representation(ABC):
         Abstract method that finds the two electron integral elements.
         """
         pass
-
-
-
-class Rep1sGTO(Representation):
-    """
-    Representation class for the symmetric GTO basis. 
-    """
-    def __init__(self,GTOs,Zs,nuclearPositions):
-        self.GTOs = GTOs
-        Representation.__init__(self,Zs,nuclearPositions,len(GTOs))
-        
-    def overLapInt(self,a,b):
-        A = self.GTOs[a]
-        B = self.GTOs[b]
-        return overlap1s(A.alpha,A.type,A.center,B.alpha,B.type,B.center)
-
-    def kineticInt(self,a,b):
-        A = self.GTOs[a]
-        B = self.GTOs[b]
-        return kineticInt1s(A.alpha,A.type,A.center,B.alpha,B.type,B.center)
-    
-    def nucInt(self,a,b,R_C,Z):
-        A = self.GTOs[a]
-        B = self.GTOs[b]
-        return nucInt1s(A.alpha,A.type,A.center,B.alpha,B.type,B.center,R_C,Z)
-
-    def twoElecInt(self,a,b,c,d):
-        A = self.GTOs[a]
-        B = self.GTOs[b]
-        C = self.GTOs[c]
-        D = self.GTOs[d]
-        return twoElecInt1s(A.alpha,A.type,A.center,B.alpha,B.type,B.center,
-                                  C.alpha,C.type,C.center,D.alpha,D.type,D.center)
 
 
 class RepGTO(Representation):
@@ -182,15 +139,12 @@ class RepGTO(Representation):
         B = self.GTOs[b]
         return overlap(A.alpha,A.type,A.center,B.alpha,B.type,B.center)
     
-    def kineticInt(self,a,b):
+    def kineticPlusNucInt(self,a,b):
         A = self.GTOs[a]
         B = self.GTOs[b]
-        return kinetic(A.alpha,A.type,A.center,B.alpha,B.type,B.center)
-    
-    def nucInt(self,a,b,R_C,Z):
-        A = self.GTOs[a]
-        B = self.GTOs[b]
-        return -Z*nuclear_attraction(A.alpha,A.type,A.center,B.alpha,B.type,B.center,R_C)
+        kineticInt = kinetic(A.alpha,A.type,A.center,B.alpha,B.type,B.center)
+        nucInt = nuc(A.alpha,A.type,A.center,B.alpha,B.type,B.center,self.nuclearPositions,self.Zs)
+        return kineticInt + nucInt
     
     def twoElecInt(self,a,b,c,d):
         A = self.GTOs[a]
@@ -203,21 +157,34 @@ class RepGTO(Representation):
 
 
 class RepCGTO(Representation):
-    def __init__(self,GTOs,Zs,nuclearPositions):
-        self.GTOs = GTOs
-        Representation.__init__(self,Zs,nuclearPositions,len(GTOs))
+    def __init__(self,CGTOs,Zs,nuclearPositions):
+        self.CGTOs = CGTOs
 
-        #should use RepGTO to get H matrix and then perform inner products to get contraction
+        primitiveGTOs = []
+        self.CRepIndicies = []
+        for CGTO in CGTOs:
+            self.CRepIndicies.append(len(primitiveGTOs))
+            primitiveGTOs += CGTO.primitives
+        self.CRepIndicies.append(len(primitiveGTOs))
+
+        self.primativeRep = RepGTO(primitiveGTOs,Zs,nuclearPositions)
+
+        Representation.__init__(self,Zs,nuclearPositions,len(CGTOs))
+    
+    def reduceMatrix(self,M,a,b):
+        return M[self.CRepIndicies[a]:self.CRepIndicies[a+1],self.CRepIndicies[b]:self.CRepIndicies[b+1]]
+    
+    def reduce4Array(self,A,a,b,c,d):
+        return A[self.CRepIndicies[a]:self.CRepIndicies[a+1],self.CRepIndicies[b]:self.CRepIndicies[b+1],
+                 self.CRepIndicies[c]:self.CRepIndicies[c+1],self.CRepIndicies[d]:self.CRepIndicies[d+1]]
 
     def overLapInt(self,a,b):  
-        pass
+        return np.einsum("ij,i,j",self.reduceMatrix(self.primativeRep.S,a,b),self.CGTOs[a].ds,self.CGTOs[b].ds) 
     
-    def kineticInt(self,a,b):
-        pass
+    def kineticPlusNucInt(self,a,b):
+        return np.einsum("ij,i,j",self.reduceMatrix(self.primativeRep.h,a,b),self.CGTOs[a].ds,self.CGTOs[b].ds) 
     
-    def nucInt(self,a,b,R_C,Z):
-        pass
-
     def twoElecInt(self,a,b,c,d):
-        pass
+        return np.einsum("ijkl,i,j,k,l",self.reduce4Array(self.primativeRep.twoElecInts,a,b,c,d),
+                         self.CGTOs[a].ds,self.CGTOs[b].ds,self.CGTOs[c].ds,self.CGTOs[d].ds) 
 
