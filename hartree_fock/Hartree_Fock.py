@@ -1,6 +1,12 @@
 import numpy as np
 from scipy.linalg import eigh
 
+class Shell:
+    def __init__(self,energy,ds,spin):
+        self.energy = energy
+        self.ds = ds
+        self.spin = spin
+
 
 def takeGroundEigStates(sortedStates,N):
     """
@@ -30,13 +36,13 @@ def iterateHF(ups,downs,rep,E,maxError,getTargetEigStates,depth=0):
     eigenValsDown,eigenVecsDown = eigh(FMinus,rep.S)
 
     #label eigenstates as dictionaries and combine
-    combinedUp = [{"e":val,"state":eigenVecsUp[:,i],"spin":"up"} for i,val in enumerate(eigenValsUp)]
-    combinedDown = [{"e":val,"state":eigenVecsDown[:,i],"spin":"down"} for i,val in enumerate(eigenValsDown)]
+    combinedUp = [Shell(energy,eigenVecsUp[:,i],"up") for i,energy in enumerate(eigenValsUp)]
+    combinedDown = [Shell(energy,eigenVecsDown[:,i],"down") for i,energy in enumerate(eigenValsDown)]
     combinedStates = combinedUp + combinedDown
 
     #find target eigenstates (usually ground) and normalise
-    sortedStates = sorted(combinedStates,key=lambda v: v["e"])
-    ocuppiedStates = rep.normaliseDicList(getTargetEigStates(sortedStates)) 
+    sortedStates = sorted(combinedStates,key=lambda s: s.energy)
+    ocuppiedStates = rep.normaliseShell(getTargetEigStates(sortedStates)) 
 
     #find energy
     ENew = rep.findE(ocuppiedStates)
@@ -48,6 +54,6 @@ def iterateHF(ups,downs,rep,E,maxError,getTargetEigStates,depth=0):
         print("max recursion depth")
         return ENew,ocuppiedStates
     else:
-        upsNew = [s["state"] for s in ocuppiedStates if s["spin"] == "up"]
-        downsNew = [s["state"] for s in ocuppiedStates if s["spin"] == "down"]
+        upsNew = [s.ds for s in ocuppiedStates if s.spin == "up"]
+        downsNew = [s.ds for s in ocuppiedStates if s.spin == "down"]
         return iterateHF(upsNew,downsNew,rep,ENew,maxError,getTargetEigStates,depth+1)

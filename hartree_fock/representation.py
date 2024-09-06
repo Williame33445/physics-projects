@@ -77,13 +77,13 @@ class Representation(ABC):
         """
         return [self.normalise(C) for C in lst]
     
-    def normaliseDicList(self,lst):
+    def normaliseShell(self,lst):
         """
         Method that normalises a list of dictionaries in the form 
         defined in hartree_fock.py.
         """
         for i,D in enumerate(lst):
-            lst[i]["state"] = self.normalise(D["state"])
+            lst[i].ds = self.normalise(D.ds)
         return lst
     
     def F(self,states1,states2):
@@ -101,7 +101,7 @@ class Representation(ABC):
         Method that finds E given a list of dictionaries in the form 
         defined in hartree_fock.py
         """
-        return sum([S["e"] + np.einsum("ij,i,j",self.h,S["state"],S["state"]) for S in states])/2 #use S or C consistently
+        return sum([S.energy + np.einsum("ij,i,j",self.h,S.ds,S.ds) for S in states])/2 #use S or C consistently
 
 
     @abstractmethod

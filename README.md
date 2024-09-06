@@ -15,6 +15,5 @@ Things to do:
 - look at Kopmann theorm for Helium, should be able to get hydrogen specra as well
 - look at Generalized X-Ray Scattering Factors ROBERT F. STEWART
 - using Hartree-Fock approximation to calculate cross-sections due to molecules (Born approx)
-- make states in Hartree Fock more elegant 
 - fix 1s integrals 
  
