@@ -1,7 +1,9 @@
-import numpy as np
 from scipy.linalg import eigh
 
-class Shell:
+class Electron:
+    """
+    Class that holds the electron state.
+    """
     def __init__(self,energy,ds,spin):
         self.energy = energy
         self.ds = ds
@@ -35,14 +37,14 @@ def iterateHF(ups,downs,rep,E,maxError,getTargetEigStates,depth=0):
     eigenValsUp,eigenVecsUp = eigh(FPlus,rep.S)
     eigenValsDown,eigenVecsDown = eigh(FMinus,rep.S)
 
-    #label eigenstates as dictionaries and combine
-    combinedUp = [Shell(energy,eigenVecsUp[:,i],"up") for i,energy in enumerate(eigenValsUp)]
-    combinedDown = [Shell(energy,eigenVecsDown[:,i],"down") for i,energy in enumerate(eigenValsDown)]
+    #put eigenstates into electron objects and combine
+    combinedUp = [Electron(energy,eigenVecsUp[:,i],"up") for i,energy in enumerate(eigenValsUp)]
+    combinedDown = [Electron(energy,eigenVecsDown[:,i],"down") for i,energy in enumerate(eigenValsDown)]
     combinedStates = combinedUp + combinedDown
 
     #find target eigenstates (usually ground) and normalise
     sortedStates = sorted(combinedStates,key=lambda s: s.energy)
-    ocuppiedStates = rep.normaliseShell(getTargetEigStates(sortedStates)) 
+    ocuppiedStates = rep.normaliseElectronList(getTargetEigStates(sortedStates)) 
 
     #find energy
     ENew = rep.findE(ocuppiedStates)
@@ -50,7 +52,7 @@ def iterateHF(ups,downs,rep,E,maxError,getTargetEigStates,depth=0):
     #is result is accurate enough/ recursion depth is reached return, otherwise iterate again
     if abs(ENew - E) < maxError or depth>150:
         return ENew,ocuppiedStates
-    elif depth>600:
+    elif depth>999:
         print("max recursion depth")
         return ENew,ocuppiedStates
     else:

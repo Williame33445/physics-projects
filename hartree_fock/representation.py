@@ -1,7 +1,8 @@
 from abc import abstractmethod, ABC
 import numpy as np 
 
-from MolecularIntegrals import *
+from molecularIntegrals import GTOIntegrals 
+from molecularIntegrals import GTO1sIntegrals
 
 
 class Representation(ABC):
@@ -15,8 +16,8 @@ class Representation(ABC):
     """
 
     def __init__(self,Zs,nuclearPositions,repNumb):
-        self.Zs = np.array(Zs)
-        self.nuclearPositions = np.array(nuclearPositions) 
+        self.Zs = Zs
+        self.nuclearPositions = nuclearPositions
         self.repNumb = repNumb
 
         #find base matricies and 2 electron integrals
@@ -77,14 +78,13 @@ class Representation(ABC):
         """
         return [self.normalise(C) for C in lst]
     
-    def normaliseShell(self,lst):
+    def normaliseElectronList(self,electrons):
         """
-        Method that normalises a list of dictionaries in the form 
-        defined in hartree_fock.py.
+        Method that normalises a list electron objects.
         """
-        for i,D in enumerate(lst):
-            lst[i].ds = self.normalise(D.ds)
-        return lst
+        for i,S in enumerate(electrons):
+            electrons[i].ds = self.normalise(S.ds)
+        return electrons
     
     def F(self,states1,states2):
         """
@@ -96,12 +96,11 @@ class Representation(ABC):
         return self.h + sum1 - sum2 +sum3
     
     
-    def findE(self,states):
+    def findE(self,electrons):
         """
-        Method that finds E given a list of dictionaries in the form 
-        defined in hartree_fock.py
+        Method that finds E given a list of electron objects.
         """
-        return sum([S.energy + np.einsum("ij,i,j",self.h,S.ds,S.ds) for S in states])/2 #use S or C consistently
+        return sum([C.energy + np.einsum("ij,i,j",self.h,C.ds,C.ds) for C in electrons])/2
 
 
     @abstractmethod
@@ -114,7 +113,7 @@ class Representation(ABC):
     @abstractmethod
     def kineticPlusNucInt(self,p,q):
         """
-        Abstract method that finds the kinetic integral elements.
+        Abstract method that finds the kinetic + nuclear integral elements.
         """
         pass
 
@@ -128,7 +127,7 @@ class Representation(ABC):
 
 class RepGTO(Representation):
     """
-    Representation class for the general GTO basis. 
+    Representation class for primative GTO basis. 
     """
     def __init__(self,GTOs,Zs,nuclearPositions):
         self.GTOs = GTOs
@@ -137,13 +136,13 @@ class RepGTO(Representation):
     def overLapInt(self,a,b):
         A = self.GTOs[a]
         B = self.GTOs[b]
-        return overlap(A.alpha,A.type,A.center,B.alpha,B.type,B.center)
+        return GTOIntegrals.overlap(A.alpha,A.type,A.center,B.alpha,B.type,B.center)
     
     def kineticPlusNucInt(self,a,b):
         A = self.GTOs[a]
         B = self.GTOs[b]
-        kineticInt = kinetic(A.alpha,A.type,A.center,B.alpha,B.type,B.center)
-        nucInt = nuc(A.alpha,A.type,A.center,B.alpha,B.type,B.center,self.nuclearPositions,self.Zs)
+        kineticInt = GTOIntegrals.kinetic(A.alpha,A.type,A.center,B.alpha,B.type,B.center)
+        nucInt = GTOIntegrals.nuc(A.alpha,A.type,A.center,B.alpha,B.type,B.center,self.nuclearPositions,self.Zs)
         return kineticInt + nucInt
     
     def twoElecInt(self,a,b,c,d):
@@ -152,11 +151,14 @@ class RepGTO(Representation):
         C = self.GTOs[c]
         D = self.GTOs[d]
         #order of c and b's here is due to notational differences
-        return electron_repulsion(A.alpha,A.type,A.center,C.alpha,C.type,C.center,
+        return GTOIntegrals.electron_repulsion(A.alpha,A.type,A.center,C.alpha,C.type,C.center,
                                   B.alpha,B.type,B.center,D.alpha,D.type,D.center)
 
 
 class RepCGTO(Representation):
+    """
+    Representation class for the contracted GTO basis.
+    """
     def __init__(self,CGTOs,Zs,nuclearPositions):
         self.CGTOs = CGTOs
 
@@ -188,3 +190,35 @@ class RepCGTO(Representation):
         return np.einsum("ijkl,i,j,k,l",self.reduce4Array(self.primativeRep.twoElecInts,a,b,c,d),
                          self.CGTOs[a].ds,self.CGTOs[b].ds,self.CGTOs[c].ds,self.CGTOs[d].ds) 
 
+
+class Rep1sGTO(Representation):
+    """
+    Representation class for only 1s GTOs.
+    """
+    def __init__(self,GTOs,Zs,nuclearPositions):
+        self.GTOs = GTOs
+        
+        for GTO in GTOs:
+            assert np.all(GTO.type == np.zeros(3))
+
+        Representation.__init__(self,Zs,nuclearPositions,len(GTOs))
+
+    def overLapInt(self,a,b):
+        A = self.GTOs[a]
+        B = self.GTOs[b]
+        return GTO1sIntegrals.overlap1s(A.center,A.alpha,B.center,B.alpha)
+    
+    
+    def kineticPlusNucInt(self,a,b):
+        A = self.GTOs[a]
+        B = self.GTOs[b]
+        kineticInt = GTO1sIntegrals.kineticInt1s(A.center,A.alpha,B.center,B.alpha)
+        nucInt = GTO1sIntegrals.nucInt1s(A.center,A.alpha,B.center,B.alpha,self.nuclearPositions,self.Zs)
+        return kineticInt + nucInt
+    
+    def twoElecInt(self,a,b,c,d):
+        A = self.GTOs[a]
+        B = self.GTOs[b]
+        C = self.GTOs[c]
+        D = self.GTOs[d]
+        return GTO1sIntegrals.twoElecInt2s(A.center,A.alpha,B.center,B.alpha,C.center,C.alpha,D.center,D.alpha)

@@ -6,7 +6,7 @@ Things to do:
 - LAPW copper calcuation is broken
 - some more density functional problems
 - look at the effect of defects (https://arxiv.org/pdf/1812.06201)
-- hartree-fock visualisation by density plots + more applications (calculation dipole moments + limits to method)
+- hartree-fock visualisation by density plots (use mesh method and add getValue(x,y,z) to GTO and CGTO) + more applications (calculation dipole moments + limits to method)
 - https://www.physics.rutgers.edu/grad/509/ has some interesting topics
 - Grover algorithm visualisation
 - latex on markdown with \tag seems to be broken
@@ -14,6 +14,4 @@ Things to do:
 - classical scattering 
 - look at Kopmann theorm for Helium, should be able to get hydrogen specra as well
 - look at Generalized X-Ray Scattering Factors ROBERT F. STEWART
-- using Hartree-Fock approximation to calculate cross-sections due to molecules (Born approx)
-- fix 1s integrals 
- 
+- using Hartree-Fock approximation to calculate cross-sections due to molecules (Born approx) 
