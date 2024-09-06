@@ -72,6 +72,7 @@ Some simple examples of the simulation are given in hartree-fock-calculations.ip
 | $O$    | -74.582    | -75.113
 
 Molecular parameters (like bond length) can also be deduced by finding the parameter than minimises the total energy (this is effective as at this level of approximation molecular energy states seem continuous). In hartree-fock-calculations.ipynb, $H_2$ and $H_2O$ are considered. For $H_2$, the bond length found was $1.388$ au. The experimental result is 1.401 au. For $H_2O$, the bond length found was 1.817 au and the angle between bonds found was 107.227 degrees. The experimental values are 1.809 au and 104.5 degrees.
+
 ## References
 
 Thijseen J., 2013. Computational Physics. Cambridge: Cambridge University Press
