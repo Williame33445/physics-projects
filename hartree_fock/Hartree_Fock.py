@@ -15,6 +15,15 @@ def takeGroundEigStates(sortedStates,N):
     Function that returns the states corresponding to the ground state for N electrons.
     """
     return sortedStates[:N]
+
+def takeLthExcitedSpin(sortedStates,N,L,spin):
+    """
+    Function that returns the electrons corresponding to a certain spin being excited to its Lth
+    state (N is the number of electrons).
+    """
+    spinStates = list(filter(lambda s: s.spin == spin, sortedStates[N-1:]))
+    return sortedStates[:N-1] + [spinStates[L]]
+
      
 
 def iterateHF(ups,downs,rep,E,maxError,getTargetEigStates,depth=0): 
