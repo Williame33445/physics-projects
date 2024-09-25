@@ -14,6 +14,9 @@ def getType(l):
         return [np.array([1,0,0]),np.array([0,1,0]),np.array([0,0,1])]
     elif l == 2:
         return [np.array([1,1,0]),np.array([1,0,1]),np.array([0,1,1]),np.array([2,0,0]),np.array([0,2,0])]
+    elif l == 3:
+        return [np.array([3,0,0]),np.array([0,3,0]),np.array([0,1,2]),np.array([2,1,0]),np.array([0,2,1]),
+                np.array([1,2,0]),np.array([1,0,2])]
     else:
         print("Error, l required is greater than implemented in getType")
 
