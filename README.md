@@ -12,3 +12,4 @@ Things to do:
 - KKR method for copper (see ON THE CALCULATION OF THE ENERGY OF A BLOCH WAVE IN A METAL by J. KORRINGA)
 - classical scattering  
 - Hartree Fock stuff (see notebook)
+- need to sort out the format of references

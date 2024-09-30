@@ -18,6 +18,7 @@ class GTOPrimative:
         k = self.type[2]
         return (xv - Rx)**i*(yv - Ry)**j*(zv - Rz)**k*np.exp(-self.alpha*((xv - Rx)**2 + (yv - Ry)**2 + (zv - Rz)**2))
     
+    
 class GTOContraction:
     """
     Class that holds the contracted GTOs.
