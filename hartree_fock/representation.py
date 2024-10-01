@@ -127,7 +127,7 @@ class Representation(ABC):
 
 class RepGTO(Representation):
     """
-    Representation class for primative GTO basis. 
+    Representation class for primitive GTO basis. 
     """
     def __init__(self,GTOs,Zs,nuclearPositions):
         self.GTOs = GTOs
@@ -169,7 +169,7 @@ class RepCGTO(Representation):
             primitiveGTOs += CGTO.primitives
         self.CRepIndicies.append(len(primitiveGTOs))
 
-        self.primativeRep = RepGTO(primitiveGTOs,Zs,nuclearPositions)
+        self.primitiveRep = RepGTO(primitiveGTOs,Zs,nuclearPositions)
 
         Representation.__init__(self,Zs,nuclearPositions,len(CGTOs))
     
@@ -181,13 +181,13 @@ class RepCGTO(Representation):
                  self.CRepIndicies[c]:self.CRepIndicies[c+1],self.CRepIndicies[d]:self.CRepIndicies[d+1]]
 
     def overLapInt(self,a,b):  
-        return np.einsum("ij,i,j",self.reduceMatrix(self.primativeRep.S,a,b),self.CGTOs[a].ds,self.CGTOs[b].ds) 
+        return np.einsum("ij,i,j",self.reduceMatrix(self.primitiveRep.S,a,b),self.CGTOs[a].ds,self.CGTOs[b].ds) 
     
     def kineticPlusNucInt(self,a,b):
-        return np.einsum("ij,i,j",self.reduceMatrix(self.primativeRep.h,a,b),self.CGTOs[a].ds,self.CGTOs[b].ds) 
+        return np.einsum("ij,i,j",self.reduceMatrix(self.primitiveRep.h,a,b),self.CGTOs[a].ds,self.CGTOs[b].ds) 
     
     def twoElecInt(self,a,b,c,d):
-        return np.einsum("ijkl,i,j,k,l",self.reduce4Array(self.primativeRep.twoElecInts,a,b,c,d),
+        return np.einsum("ijkl,i,j,k,l",self.reduce4Array(self.primitiveRep.twoElecInts,a,b,c,d),
                          self.CGTOs[a].ds,self.CGTOs[b].ds,self.CGTOs[c].ds,self.CGTOs[d].ds) 
 
 

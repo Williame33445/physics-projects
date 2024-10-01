@@ -1,6 +1,6 @@
 import basis_set_exchange as basis_set_exchange 
 import numpy as np
-from GTOs import GTOPrimative, GTOContraction
+from GTOs import GTOPrimitive, GTOContraction
 
 #code to get GTO data from Basis Stack exchange
 
@@ -22,7 +22,7 @@ def getType(l):
 
 def getGuassians(set,atom,center,basisType):
     """
-    Gets a certain Gaussian set from Basis Stack exchange and puts it into a "contracted" or "primative"
+    Gets a certain Gaussian set from Basis Stack exchange and puts it into a "contracted" or "primitive"
     form.
     """
     bs_dict = basis_set_exchange.get_basis(set,elements=atom)
@@ -37,7 +37,7 @@ def getGuassians(set,atom,center,basisType):
                     exponents = contraction["exponents"]
                     coefficients = contraction["coefficients"]
                     for i in range(len(exponents)):
-                        contractedGTOs.append(GTOPrimative(float(exponents[i]),center,type))
+                        contractedGTOs.append(GTOPrimitive(float(exponents[i]),center,type))
                         #this is to take into account Pople type basis sets, may cause error in some cases
                         try: 
                             ds.append(float(coefficients[l][i]))

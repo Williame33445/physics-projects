@@ -1,8 +1,8 @@
 import numpy as np
 
-class GTOPrimative:
+class GTOPrimitive:
     """
-    Class that holds the primative GTO.
+    Class that holds the primitive GTO.
     """
     def __init__(self,alpha,center,type):
         self.alpha = alpha
