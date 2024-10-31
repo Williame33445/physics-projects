@@ -3,9 +3,9 @@ import os
 import sys
 import numpy as np
 
-sys.path.append(os.path.abspath("."))
+sys.path.append(os.path.abspath("./quantum-scattering"))
 
-from useful_code.numerov_method import *
+from numerov_method import *
 
 
 
@@ -78,3 +78,6 @@ class TestNumerov(unittest.TestCase):
 
 
 
+
+if __name__=="__main__":
+    unittest.main()

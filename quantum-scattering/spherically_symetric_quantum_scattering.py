@@ -2,9 +2,7 @@ import sys
 import os
 import numpy as np
 from scipy import special
-
-sys.path.append(os.path.abspath("."))
-from useful_code.numerov_method import *
+from numerov_method import *
 
 #units, defines 2m/hbar^2 units
 units = 6.12
