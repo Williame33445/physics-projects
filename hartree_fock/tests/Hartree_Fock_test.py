@@ -3,35 +3,39 @@ import os
 import sys
 import numpy as np
 
-sys.path.append(os.path.abspath("."))
+sys.path.append(os.path.abspath("./hartree_fock"))
 
-from electronic_structure.hartree_fock.Hartree_Fock import *
-from electronic_structure.hartree_fock.representation import *
-
+from Hartree_Fock import *
+from representation import *
+from get_GTOs_from_BSE import *
+from GTOs import *
 
 class Test_Hartree_Fock(unittest.TestCase):
 
     def testHeliumGround(self):
-        #define simulation parameters
-        alphas = [0.298073,1.242567,5.782948,38.474970]
-        basisPos = [np.array([0,0,0]),np.array([0,0,0]),np.array([0,0,0]),np.array([0,0,0])]
-        Zs = [2]
-        nucPos = [np.array([0,0,0])]
-        maxError = 1E-4
+        #sets up primitive 3ZaPa-NR-CV Helium basis set (should be better for excited states)
+        GTOsHe = getGuassians("3ZaPa-NR-CV", 2, np.zeros(3), basisType="primitive")
+
+        #simulation parameters
+        ZsHe = [2]
+        nucPosHe = [np.array([0, 0, 0])]
+        maxErrorHe = 1E-4
 
         #define representation class
-        rep = RepGTO(Zs,alphas,nucPos,basisPos,basisPos)
+        repHe = RepGTO(GTOsHe, ZsHe, nucPosHe)
 
         #define intial guess
-        ups = [[1,1,1,1]]
-        downs = [[1,1,1,1]]
+        ups = repHe.normaliseList([[1 for i in range(len(GTOsHe))]])
+        downs = repHe.normaliseList([[1 for i in range(len(GTOsHe))]])
         EGuess = -2.8
-        expected = -2.8551714954912644
 
-        #run simulation and print energy
-        E,states = iterateHF(rep.normaliseList(ups),rep.normaliseList(downs),rep,EGuess,maxError,lambda s: takeGroundEigStates(s,2))
+        #calculate ground state and print energy
+        E1s1s_S, HeElec1s1s_S = iterateHF(ups, downs, repHe, EGuess, maxErrorHe, lambda s: takeGroundEigStates(s,2))
 
-        difference = np.round(E - expected, decimals=1)
+        expected = -2.86158
+        difference = np.round(E1s1s_S - expected, decimals=1)
             
         self.assertEqual(0,difference)
-        
+
+if __name__=="__main__":
+    unittest.main()
