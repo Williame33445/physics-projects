@@ -5,34 +5,42 @@ import copy
 q0 = np.array([1, 0],dtype=np.complex_)  # |0>
 q1 = np.array([0, 1],dtype=np.complex_)  # |1>
 
-class Register:
-    def __init__(self, productOfQubits):
-        self.n = len(productOfQubits)
-        self.N = 2**self.n
-        
-        self.qubits = np.array([1],dtype=np.complex_)
-        for q in productOfQubits:
-            qNorm = q/np.linalg.norm(q)
-            self.qubits = np.kron(self.qubits, qNorm)
+def intialiseProductRegister(productOfQubits):
+    qubits = np.array([1],dtype=np.complex_)
+    for q in productOfQubits:
+        qNorm = q/np.linalg.norm(q)
+        qubits = np.kron(qubits, qNorm)
+    return Register(qubits)
 
+def mergeRegisters(r1,r2):
+    return Register(np.kron(r1.qubits,r2.qubits))
+
+class Register:
+    def __init__(self, qubits): #this needs to be altered to a more general situation
+        self.N = np.shape(qubits)[0]
+        self.n = np.log2(self.N).astype(int)
+
+        self.qubits = qubits
+        
         self.binary = []
         for i in range(self.N):
             self.binary.append(format(i, f'0{self.n}b'))
 
 
-    def displayQubits(self,cutoff=10**-9,endBitsRemoved=0,type="int"):
+    def displayQubits(self,dType="int",cutoff=3,binBits=0):
         registerString = ""
         for i in range(self.N):
-            if np.linalg.norm(self.qubits[i]) > cutoff:
-                if endBitsRemoved > 0:
-                    index = self.binary[i][:-endBitsRemoved]
-                else:
+            if np.round(self.qubits[i],cutoff) != 0:
+                if dType == "int":
+                    index = str(i)
+                elif dType == "bin":
                     index = self.binary[i]
+                elif dType == "intbin":
+                    index = str(int(self.binary[i][:-binBits],2)) + "," + self.binary[i][-binBits:]
+                elif dType == "binint":
+                    index = self.binary[i][:-binBits] + "," + str(int(self.binary[i][-binBits:],2))
 
-                if type == "int":
-                    index = str(int(index,2))
-
-                registerString += f" + {np.round(self.qubits[i],3)}|" + index + ">"
+                registerString += f" + {np.round(self.qubits[i],cutoff)}|" + index + ">"
         return registerString[3:]
     
     def findSingleQubitOp(self,op,index):
@@ -77,3 +85,9 @@ class Register:
         for i in range(len(reveresedBinary)):
             newRegister[reveresedBinary[i]] = self.qubits[i]
         self.qubits = newRegister     
+
+test = intialiseProductRegister([q0,q0,q0,q0,q0])
+test.applySingleQubitProduct(np.array([[1,1],[1,-1]])/np.sqrt(2), 0, 4)
+print(test.displayQubits(dType="bin"))
+
+#why can perform this operation to keep a 0 at the front but not the back?
