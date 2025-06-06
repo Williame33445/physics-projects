@@ -2,11 +2,11 @@ import numpy as np
 import copy
 
 
-q0 = np.array([1, 0],dtype=np.complex_)  # |0>
-q1 = np.array([0, 1],dtype=np.complex_)  # |1>
+q0 = np.array([1, 0],dtype=np.complex128)  # |0>
+q1 = np.array([0, 1],dtype=np.complex128)  # |1>
 
 def intialiseProductRegister(productOfQubits):
-    qubits = np.array([1],dtype=np.complex_)
+    qubits = np.array([1],dtype=np.complex128)
     for q in productOfQubits:
         qNorm = q/np.linalg.norm(q)
         qubits = np.kron(qubits, qNorm)
@@ -14,6 +14,9 @@ def intialiseProductRegister(productOfQubits):
 
 def mergeRegisters(r1,r2):
     return Register(np.kron(r1.qubits,r2.qubits))
+
+def mergeRegisterOperator(o1,o2):
+    return np.kron(o1,o2)
 
 class Register:
     def __init__(self, qubits): #this needs to be altered to a more general situation
@@ -27,7 +30,7 @@ class Register:
             self.binary.append(format(i, f'0{self.n}b'))
 
 
-    def displayQubits(self,dType="int",cutoff=3,binBits=0):
+    def displayQubits(self,dType="int",cutoff=3,binBits=0,plusNumber=20):
         registerString = ""
         for i in range(self.N):
             if np.round(self.qubits[i],cutoff) != 0:
@@ -41,41 +44,49 @@ class Register:
                     index = self.binary[i][:-binBits] + "," + str(int(self.binary[i][-binBits:],2))
 
                 registerString += f" + {np.round(self.qubits[i],cutoff)}|" + index + ">"
-        return registerString[3:]
+        #only return the first plusNumber + terms
+        splitString = registerString.split("+")
+        if len(splitString) <= plusNumber:  
+            return registerString[3:]
+        return "+".join(registerString[3:].split("+")[:plusNumber] + [" ..."])
     
     def findSingleQubitOp(self,op,index):
-        registerOp = np.array([1],dtype=np.complex_)
+        registerOp = np.array([1],dtype=np.complex128)
         for i in range(self.n): 
             if i == index:
                 registerOp = np.kron(registerOp, op)
             else:
-                registerOp = np.kron(registerOp, np.eye(2,dtype=np.complex_))
+                registerOp = np.kron(registerOp, np.eye(2,dtype=np.complex128))
         return registerOp
 
     def findControlledSingleQubitOp(self,op, controlIndex, targetIndex):
         
-        nonControlled = self.findSingleQubitOp(np.array([[1,0],[0,0]],dtype=np.complex_), controlIndex)
-        controlled = self.findSingleQubitOp(np.array([[0,0],[0,1]],dtype=np.complex_), controlIndex) @ self.findSingleQubitOp(op, targetIndex)
+        nonControlled = self.findSingleQubitOp(np.array([[1,0],[0,0]],dtype=np.complex128), controlIndex)
+        controlled = self.findSingleQubitOp(np.array([[0,0],[0,1]],dtype=np.complex128), controlIndex) @ self.findSingleQubitOp(op, targetIndex)
         return nonControlled + controlled
     
-    def applySingleQubitProduct(self,op,start,stop):
-        registerOp = np.array([1],dtype=np.complex_)
+    def getSingleQubitProduct(self,op,start,stop):
+        registerOp = np.array([1],dtype=np.complex128)
         for i in range(self.n):
             if start <= i < stop:
                 registerOp = np.kron(registerOp, op)
             else:
-                registerOp = np.kron(registerOp, np.eye(2,dtype=np.complex_))
-        self.qubits = registerOp @ self.qubits
+                registerOp = np.kron(registerOp, np.eye(2,dtype=np.complex128))
+        return registerOp
+
+    def applySingleQubitProduct(self,op,start,stop):
+        self.qubits = self.getSingleQubitProduct(op,start,stop) @ self.qubits
+
         
     def applyGate(self, gate):
         self.qubits = gate @ self.qubits
 
     def applyH(self, index):
-        H = np.array([[1, 1], [1, -1]],dtype=np.complex_) / np.sqrt(2,dtype=np.complex_)
+        H = np.array([[1, 1], [1, -1]],dtype=np.complex128) / np.sqrt(2,dtype=np.complex128)
         self.qubits = self.findSingleQubitOp(H, index) @ self.qubits
 
     def applyCNOT(self, controlIndex, targetIndex):
-        X = np.array([[0,1],[1,0]],dtype=np.complex_)
+        X = np.array([[0,1],[1,0]],dtype=np.complex128)
         CNOT = self.findControlledSingleQubitOp(self, X, controlIndex, targetIndex)
         self.qubits = CNOT @ self.qubits
 
@@ -85,9 +96,3 @@ class Register:
         for i in range(len(reveresedBinary)):
             newRegister[reveresedBinary[i]] = self.qubits[i]
         self.qubits = newRegister     
-
-test = intialiseProductRegister([q0,q0,q0,q0,q0])
-test.applySingleQubitProduct(np.array([[1,1],[1,-1]])/np.sqrt(2), 0, 4)
-print(test.displayQubits(dType="bin"))
-
-#why can perform this operation to keep a 0 at the front but not the back?
