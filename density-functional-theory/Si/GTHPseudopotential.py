@@ -8,12 +8,12 @@ def sphericalHarmonic(l, m, k):
     if kMag == 0:
         return sph_harm(m, l, 0, 0)
     
-    theta = np.arccos(k[2]/kMag)
+    theta = np.real_if_close(np.arccos(k[2]/kMag))
 
     if k[0] == 0:
         phi = np.pi/2
     else:
-        phi = np.arctan(k[1]/k[0])
+        phi = np.real_if_close(np.arctan(k[1]/k[0]))
 
     return sph_harm(m, l, phi, theta)
 
