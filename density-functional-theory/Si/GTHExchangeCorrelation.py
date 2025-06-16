@@ -11,13 +11,12 @@ b4 = 0.02359291751427506
 
 def Vxc(n):
     n = np.asarray(n)
-    V = np.zeros_like(n, dtype=np.float64)
+    V = np.zeros_like(n, dtype=np.complex128)
     
     #takes nonzero elements of n
-    mask = n != 0
+    mask = np.abs(n) > 1e-8
     n_nonzero = n[mask] 
     
-
     rs = (3 / (4 * np.pi * n_nonzero))**(1/3)
 
     den1 = -3*a1 -2*a2*rs -a3*rs**2
