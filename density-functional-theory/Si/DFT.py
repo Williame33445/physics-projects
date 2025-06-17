@@ -12,11 +12,14 @@ def u(r,q):
     return (2*r - q - 1)/(2*q)
 
 class DFTSimulation:
-    def __init__(self, ax, ay, az, KIxMax, KIyMax, KIzMax, kxSamp, kySamp, kzSamp, atoms, occuptationFunction,Vxc):
+    def __init__(self, ax, ay, az, KIxMax, KIyMax, KIzMax, kxSamp, kySamp, kzSamp, atoms, N,Vxc, tol):
         self.atoms = atoms
-        self.occuptationFunction = occuptationFunction
+        self.N = N
         self.volume = ax*ay*az
         self.Vxc = Vxc
+        self.ax = ax
+        self.ay = ay
+        self.az = az
 
         #lattice sampling for plane wave basis
         self.KHIxMax = KIxMax
@@ -34,7 +37,6 @@ class DFTSimulation:
         KnIzs = np.arange(-2*KIzMax, 2*KIzMax + 1)
         self.KnIxGrid, self.KnIyGrid, self.KnIzGrid = np.meshgrid(KnIxs, KnIys, KnIzs, indexing="ij")
 
-
         #these lists give the K vectors associated with each index
         self.KHIs = np.stack((self.KHIxGrid, self.KHIyGrid, self.KHIzGrid), axis=-1).reshape(-1, 3)
         self.KHs = 2*np.pi*np.einsum("ij,kj",np.diag([1/ax, 1/ay, 1/az]), self.KHIs).T
@@ -49,105 +51,120 @@ class DFTSimulation:
         rzs = np.arange(1, kzSamp + 1)
         kxGrid, kyGrid, kzGrid = np.meshgrid(rxs, rys, rzs, indexing="ij")
         self.BZSamples = 2*np.pi*np.stack((u(kxGrid,kxSamp)/ax, u(kyGrid,kySamp)/ay, u(kzGrid,kzSamp)/az), axis=-1).reshape(-1, 3)
-        print(self.BZSamples)
 
-        #intial density will be set to 0, this is just a simple calculation of density in this case
+
+        self.HKins = [] #better way?
+        for k in self.BZSamples:
+            self.HKins.append(self.getHKin(k))
+
+
         self.getAtomicPotential()
         self.nK = np.full((len(KnIxs),len(KnIys),len(KnIzs)), 1e-4, dtype=np.float64)
 
         #at each stage of the iterative cycle
         for iter in range(1000):
             VxcVha = self.getKVxcVha()
-            self.Veff = VxcVha + self.V #should get kinetic part saved in here too
+            self.Veff = VxcVha + self.Va #should get kinetic part saved in here too
             self.findFixedDensitySolution()
 
             newDensity = self.getNewDensity()
-            if np.max(np.abs(newDensity - self.nK)) < 1e-3:
+            if np.max(np.abs(newDensity - self.nK)) < tol and iter > 0:
                 print("Converged")
                 print(np.array(self.epsilonss))
                 break
             else:
                 print(np.max(np.abs(newDensity - self.nK)))
-                mixingParameter = 0.1 if iter < 10 else 0.5
+                mixingParameter = 0.9 if iter < 10 else 0.6
                 self.nK = mixingParameter*newDensity + (1-mixingParameter)*self.nK
 
         
 
     
     def getAtomicPotential(self):
-        self.V = np.zeros((len(self.KHs), len(self.KHs)), dtype=np.complex128)
+        self.Va = np.zeros((len(self.KHs), len(self.KHs)), dtype=np.complex128)
         for i in range(len(self.KHs)):
-            for j in range(i+1):
-                for a in self.atoms: #local and nonlocal part needs to be applied differently
-                    self.V[i, j] += np.exp(-1j*np.dot(self.KHs[i] - self.KHs[j],a.position))*a.pseudopotential(self.KHs[i], self.KHs[j])
-                self.V[j, i] = np.conjugate(self.V[i, j])
+            for a in self.atoms:
+                self.Va[i, i] += a.pseudopotential(self.KHs[i], self.KHs[i])
+            for j in range(i):
+                for a in self.atoms:
+                    self.Va[i, j] += np.exp(-1j*np.dot(self.KHs[i] - self.KHs[j],a.position))*a.pseudopotential(self.KHs[i], self.KHs[j])
+                self.Va[j, i] = np.conjugate(self.Va[i, j])
 
-    def getHamiltonian(self,k):
-        H = self.Veff.copy()
+    def getHKin(self,k):
+        HKin = np.zeros((len(self.KHs),len(self.KHs)),dtype=np.complex128)
 
-        for i in range(len(self.KHs)): #could make this more efficient by saving the kinetic part initally
-            H[i, i] = 0.5 * ((k[0] + self.KHs[i][0])**2 + (k[1] + self.KHs[i][1])**2 + (k[2] + self.KHs[i][2])**2)
+        for i in range(len(self.KHs)): 
+            HKin[i, i] = 0.5 * ((k[0] + self.KHs[i][0])**2 + (k[1] + self.KHs[i][1])**2 + (k[2] + self.KHs[i][2])**2)
         
-        return H
+        return HKin
     
     def findFixedDensitySolution(self):
         self.epsilonss = []
         self.Css = []
-        for k in self.BZSamples:
-            H = self.getHamiltonian(k)
+        for i in range(len(self.BZSamples)):
+            H = self.HKins[i] + self.Veff
             eigenvalues, eigenvectors = np.linalg.eigh(H)
-            #sorts eigenvalues from smallest to largest
-            idx = eigenvalues.argsort()
-            self.epsilonss.append(eigenvalues[idx])
-            self.Css.append(eigenvectors[:,idx])
+            self.epsilonss.append(eigenvalues)
+            self.Css.append(eigenvectors)
 
     def getNewDensity(self): 
         newDensity = np.zeros_like(self.nK, dtype=np.complex128)
+        epsilons = np.array(self.epsilonss).flatten()
+        fermiEnergy = epsilons[epsilons.argsort()][self.N-1]
         for i in np.ndindex(newDensity.shape):
             KIx = self.KnIxGrid[i]
             KIy = self.KnIyGrid[i]
             KIz = self.KnIzGrid[i]
             KIndexRel0 = self.getKHsIndex(KIx,KIy,KIz) - self.KHs0Index 
             for j,Cs in enumerate(self.Css):
-                for k,e in enumerate(self.epsilonss[j]):
-                    occ = self.occuptationFunction(e)
+                for k,e in enumerate(self.epsilonss[j]): 
                     for KI_1 in self.KHIs:
                         if -self.KHIxMax <= KIx + KI_1[0] <= self.KHIxMax and -self.KHIyMax <= KIy + KI_1[1] <= self.KHIyMax and -self.KHIzMax <= KIz + KI_1[2] <= self.KHIzMax:
                             K1Index = self.getKHsIndex(*KI_1)
-                            newDensity[i] += occ * np.conjugate(Cs[k, KIndexRel0 + K1Index]) * Cs[k, K1Index]/(len(self.BZSamples)*self.volume)
+                            newDensity[i] += np.conjugate(Cs[KIndexRel0 + K1Index, k]) * Cs[K1Index, k]/(len(self.BZSamples)*self.volume) if e < fermiEnergy else 0
         return newDensity
     
-    def getKVxcVha(self):#the error is in here
+    def getKVxcVha(self):
         pf1 = np.exp(2*np.pi*1j*(self.KnIxMax*(self.KnIxGrid + self.KnIxMax)/(1+2*self.KnIxMax) + self.KnIyMax*(self.KnIyGrid + self.KnIyMax)/(1+2*self.KnIyMax) + self.KnIzMax*(self.KnIzGrid + self.KnIzMax)/(1+2*self.KnIzMax)))
         pf2 = np.exp(2*np.pi*1j*(self.KnIxMax*self.KnIxGrid/(1+2*self.KnIxMax) + self.KnIyMax*self.KnIyGrid/(1+2*self.KnIyMax) + self.KnIzMax*self.KnIzGrid/(1+2*self.KnIzMax)))
 
         nP = pf2*fftn(pf1*self.nK)
-        #should test this vs the explict calculationß
 
-
-        self.nP = np.real_if_close(nP)
-        #remember position conventions used here
-        VxcP =  self.Vxc(nP) #remove values 
-        VxcK = np.conjugate(pf1)*ifftn(np.conjugate(pf2)*VxcP) #clearer name
+        VxcP =  self.Vxc(nP) 
+        VxcK = np.conjugate(pf1)*ifftn(np.conjugate(pf2)*VxcP) 
         
         VxcVha = np.zeros((len(self.KHs), len(self.KHs)), dtype=np.complex128)
 
+
         for i in range(len(self.KHs)):
             KIi = self.KHIs[i]
-            for j in range(i+1):
+            VxcVha[i,i] = VxcK[2*self.KHIxMax, 2*self.KHIyMax, 2*self.KHIzMax]
+            for j in range(i):
                 KIj = self.KHIs[j]
                 Vxc = VxcK[KIi[0]-KIj[0]+ 2*self.KHIxMax, KIi[1]-KIj[1] + 2*self.KHIyMax, KIi[2] - KIj[2] + 2*self.KHIzMax]
-                if  not np.all(self.KHs[i] == self.KHs[j]):
-                    Vha =  4*np.pi*self.nK[KIi[0]-KIj[0]+ 2*self.KHIxMax, KIi[1]-KIj[1]+ 2*self.KHIyMax, KIi[2] - KIj[2]+ 2*self.KHIzMax]/np.dot(self.KHs[i]-self.KHs[j],self.KHs[i]-self.KHs[j])
-
-                else:
-                    Vha = 0
-
-
+                Vha =  4*np.pi*self.nK[KIi[0]-KIj[0]+ 2*self.KHIxMax, KIi[1]-KIj[1]+ 2*self.KHIyMax, KIi[2] - KIj[2]+ 2*self.KHIzMax]/np.dot(self.KHs[i]-self.KHs[j],self.KHs[i]-self.KHs[j])
                 VxcVha[i,j] = Vxc + Vha
                 VxcVha[j,i] = np.conjugate(VxcVha[i,j])
 
         return VxcVha
+    
+    def findnP(self,xG,yG,zG):
+        nP = np.zeros(xG.shape)
+        for i in range(xG.shape[0]):
+            for j in range(xG.shape[1]):
+                for k in range(xG.shape[2]):
+                    nP[i,j,k] = np.sum(self.nK*np.exp(-2*np.pi*1j*(self.KnIxGrid*xG[i,j,k]/self.ax + self.KnIyGrid*yG[i,j,k]/self.ay + self.KnIzGrid*zG[i,j,k]/self.az)))
+        return nP
+    
 
 
+
+ax = 5
+ay = 5
+az = 5
+KS = 1
+HPseudoPotential = GTHP.pseudopotential(0.2,1,ax*ay*az,-4.0663326,0.6778322,0,0,0,0,0)
+atomList =  [Atom(np.array([5,5,5]),HPseudoPotential)] #,Atom(np.array([1.4,0,0]),HPseudoPotential)]
+#T = 0.000001
+test = DFTSimulation(ax,ay,az,KS,KS,KS,1,1,1,atomList,1,GTHEC.Vxc,1e-4)
 
